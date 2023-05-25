@@ -1,6 +1,7 @@
 import numpy as np
-import classCell
-from classCell import Cell
+from phase import *
+from classCell import *
+
 class Board():
     def __init__(self, rows, cols):
         self.rows = rows
