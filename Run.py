@@ -1,15 +1,26 @@
 from classCell import *
 from classBoard import *
+from classScientist import *
 from classDepartment import *
 
-dept = Department(5)
+#dept = Department(5)
 board = Board(5, 5)
-print(dept)
-print(board) 
-for scientist in dept.makeScientists():
-    while scientist[1] != 0:
+print(board)
+
+dept = []
+numScientists = 5
+for i in range(numScientists):
+    dept.append(Scientist())
+for scientist in dept:
+    print(scientist)
+    while scientist.career != 0:
         # do a query while career is not over
-        scientist[1] -= 1
+        scientist.sciQuery(board)
+        print("SCIQUERY: ")
+        print(scientist.sciQuery(board))
+        print(board)
+        print(dept)
+        scientist.career -= 1
 # while scientist has career
 # query board based on hindex and career state --> influences herd mentality
 # ultimately decides to either randomly explore space or 

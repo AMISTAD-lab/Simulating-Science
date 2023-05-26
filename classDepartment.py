@@ -1,4 +1,5 @@
 import numpy as np
+from classScientist import *
 
 class Department():
     def __init__(self, numScientists):
@@ -8,8 +9,4 @@ class Department():
         return str(self.makeScientists())
 
     def makeScientists(self):
-        scientists = []
-        for i in range(self.numScientists):
-            # scientists have h-index and years left in career values
-            scientists.append([np.random.randint(0, 50), np.random.randint(0, 30)])
-        return scientists
+        return [Scientist() for i in range(self.numScientists)]

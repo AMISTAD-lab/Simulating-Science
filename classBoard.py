@@ -6,8 +6,9 @@ class Board():
     def __init__(self, rows, cols):
         self.rows = rows
         self.cols = cols
-        self.board = [[Cell(np.random.randint(low = 0, high = 20)) for i in range(self.rows)] for j in range(self.cols)]
-        # self.numSci = Scientist()
+        # board has random payoff values in each cell
+        self.board = [[Cell(np.random.randint(low = 0, high = 50), (i, j)) for i in range(self.rows)] for j in range(self.cols)]
+        self.discovered = []
 
     def __repr__(self):
         """string representation of Board"""
