@@ -1,4 +1,5 @@
 import numpy as np
+import random
 from classCell import *
 
 class Scientist():
@@ -23,7 +24,8 @@ class Scientist():
                 self.hindex += discoveredPayoffs.get(maxPayoff).cellQuery(board)
         else:
             # random behavior from scientists
-            x = np.random.randint(0, board.rows)
-            y = np.random.randint(0, board.cols)
+            location = random.choice(board.undiscovered)
+            x = location[0]
+            y = location [1]
             self.hindex += board.board[x][y].cellQuery(board)
         return self.hindex
