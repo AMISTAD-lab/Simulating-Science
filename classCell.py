@@ -13,6 +13,7 @@ class Cell():
         return str(self.payoff)
 
     def cellQuery(self, board):
+        """returns payoff for each scientist based on conditions of a cell"""
         original = self.payoff
         sciPayoff = 0.0
         if self.numHits > 3:
