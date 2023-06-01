@@ -1,3 +1,4 @@
+import seaborn as sn
 from classCell import *
 from classBoard import *
 from classScientist import *
@@ -14,6 +15,7 @@ def run(board, cellsHit):
                 print("sciQuery: ", scientist.sciQuery(key, board))
         else:
             val[0].sciQuery(key, board)
+    board.drawBoard(cellsHit)
     return board
 
 def batchRun(board, numScientists, numRuns):
@@ -40,4 +42,5 @@ def batchRun(board, numScientists, numRuns):
         print()
     return
 
-batchRun(Board(5, 5), 1, 3)
+board = Board(5, 5)
+batchRun(board, 4, 10)
