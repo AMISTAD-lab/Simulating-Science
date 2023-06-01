@@ -34,6 +34,11 @@ class Board():
                 numSciHits = 0
                 if cell.location in cellsHit.keys():
                     numSciHits = len(cellsHit[cell.location])
-                hm.annotate(f"{cell.phase.name[0]}{cell.numHits}{numSciHits}", xy=(i, j), xytext=(i+0.40, j+0.5),
+                    # plotting the "dot" scientists
+                    for x in range(1, numSciHits + 1):
+                        hm.plot(i+(x/(1 + numSciHits)), j + 0.55,
+                            marker="o", markersize=10, markeredgecolor="red",
+                            markerfacecolor="red")
+                hm.annotate(f"{cell.phase.name[0]}{cell.numHits}", xy=(i, j), xytext=(i+0.40, j+0.2),
                     fontsize=12, fontweight='bold')
         plt.show()
