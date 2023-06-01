@@ -1,10 +1,22 @@
 import seaborn as sn
+import glob
+from PIL import Image
 from classCell import *
 from classBoard import *
 from classScientist import *
 from classDepartment import *
 
-def run(board, cellsHit):
+# def make_gif(frame_folder):
+#     frames = [Image.open(image) for image in glob.glob(f"{frame_folder}/*.JPG")]
+#     frame_one = frames[0]
+#     frame_one.save("my_awesome.gif", format="GIF", append_images=frames,
+#             save_all=True, duration=100, loop=0)
+    
+#     if __name__ == "__main__":
+#         make_gif("/path/to/images")
+#     return
+
+def run(board, cellsHit, numRun):
     """runs query simulation for one year"""
     for key, val in cellsHit.items():
         if len(val) > 1:
@@ -15,7 +27,7 @@ def run(board, cellsHit):
                 print("sciQuery: ", scientist.sciQuery(key, board))
         else:
             val[0].sciQuery(key, board)
-    board.drawBoard(cellsHit)
+    board.drawBoard(cellsHit, numRun)
     return board
 
 def batchRun(board, numScientists, numRuns):
@@ -38,8 +50,14 @@ def batchRun(board, numScientists, numRuns):
                 # when one scientist ends their career, another is introduced
                 dept.remove(scientist)
                 dept.append(Scientist())
-        print(run(board, cellsHit))
+        print(run(board, cellsHit, j+1))
         print()
+
+    #animating plots
+    frames = [Image.open(f'testplot{i+1}.png') for i in range(numRuns)]
+    frame_one = frames[0]
+    frame_one.save("animation.gif", format="GIF", append_images=frames,
+            save_all=True, duration=500, loop=1)
     return
 
 board = Board(5, 5)

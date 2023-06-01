@@ -43,8 +43,6 @@ class Scientist():
         # choice = 0 --> choose randomly from undiscovered cells
         else:
             location = random.choice(board.undiscovered)
-            x = location[0]
-            y = location [1]
 
         return location
 

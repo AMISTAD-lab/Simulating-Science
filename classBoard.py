@@ -25,12 +25,14 @@ class Board():
     def getPayoffs(self):
         return [[self.board[i][j].payoff for i in range(self.rows)] for j in range(self.cols)]
 
-    def drawBoard(self, cellsHit):
+    def drawBoard(self, cellsHit, numRun):
         data = self.getPayoffs()
         hm = sn.heatmap(data = data, cmap="Blues")
+        
         for i in range(self.rows):
             for j in range(self.cols):
                 cell = self.board[i][j]
+                #finding the number of scientists on each cell each round
                 numSciHits = 0
                 if cell.location in cellsHit.keys():
                     numSciHits = len(cellsHit[cell.location])
@@ -39,6 +41,10 @@ class Board():
                         hm.plot(i+(x/(1 + numSciHits)), j + 0.55,
                             marker="o", markersize=10, markeredgecolor="red",
                             markerfacecolor="red")
-                hm.annotate(f"{cell.phase.name[0]}{cell.numHits}", xy=(i, j), xytext=(i+0.40, j+0.2),
+                #annotating cells (phase, numHits)
+                #(ex: B5 means breakthrough phase, hit 5 times)
+                hm.annotate(f"{numSciHits}{cell.phase.name[0]}{cell.numHits}", xy=(i, j), xytext=(i+0.40, j+0.2),
                     fontsize=12, fontweight='bold')
+        
+        plt.savefig(f'testplot{numRun}.png')
         plt.show()
