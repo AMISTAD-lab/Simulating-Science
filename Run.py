@@ -42,6 +42,7 @@ def batchRun(board, numScientists, numRuns):
         cellsHit = {}
         for scientist in dept:
             location = scientist.chooseCell(board)
+            print(scientist, location)
             if location in cellsHit.keys():
                 cellsHit[location].append(scientist)
             else:
@@ -60,5 +61,5 @@ def batchRun(board, numScientists, numRuns):
             save_all=True, duration=500, loop=1)
     return
 
-board = Board(5, 5)
+board = Board(2, 2)
 batchRun(board, 4, 10)
