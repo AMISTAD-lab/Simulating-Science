@@ -47,9 +47,7 @@ class Board():
                 #annotating cells (phase, numHits)
                 #(ex: B5 means breakthrough phase, hit 5 times)
                 hm.annotate(f"{cell.phase.name[0]}{cell.numHits}", xy = (j, i), xytext=(j+0.40, i+0.2),
-                    fontsize=12, fontweight='bold')
-                hm.annotate(f" {round((cell.payoff), 1)}", xy = (j, i), xytext=(j+0.40, i+0.5),
-                    fontsize=12, fontweight='bold')
+                    fontsize=8, fontweight='bold')
         
         plt.savefig(f'testplot{numRun}.png')
         plt.clf()
