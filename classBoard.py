@@ -23,11 +23,14 @@ class Board():
         return str(self.board)
 
     def getPayoffs(self):
+        """returns the payoff value for each cell of the board to make it easier
+        to get a 2D matrix of data"""
         return [[self.board[i][j].payoff for i in range(self.rows)] for j in range(self.cols)]
 
     def drawBoard(self, cellsHit, numRun):
+        """produces a plot of the board for a given run and saves the image"""
         data = self.getPayoffs()
-        hm = sn.heatmap(data = data, cmap="Blues")
+        hm = sn.heatmap(data = data, vmin = 0, vmax = 30, cmap="Blues")
         
         for i in range(self.rows):
             for j in range(self.cols):
@@ -45,7 +48,9 @@ class Board():
                 #(ex: B5 means breakthrough phase, hit 5 times)
                 hm.annotate(f"{cell.phase.name[0]}{cell.numHits}", xy = (j, i), xytext=(j+0.40, i+0.2),
                     fontsize=12, fontweight='bold')
-                hm.annotate(f"{numSciHits, (j, i)}", xy = (j,i), xytext = (i, j+0.4), fontsize=12, fontweight='bold')
+                hm.annotate(f" {round((cell.payoff), 1)}", xy = (j, i), xytext=(j+0.40, i+0.5),
+                    fontsize=12, fontweight='bold')
         
         plt.savefig(f'testplot{numRun}.png')
-        plt.show()
+        plt.clf()
+        #plt.show()

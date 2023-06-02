@@ -4,7 +4,6 @@ from PIL import Image
 from classCell import *
 from classBoard import *
 from classScientist import *
-from classDepartment import *
 
 # def make_gif(frame_folder):
 #     frames = [Image.open(image) for image in glob.glob(f"{frame_folder}/*.JPG")]
@@ -22,11 +21,12 @@ def run(board, cellsHit, numRun):
         if len(val) > 1:
             # randomly choose order in which scientists hit that same cell
             sciOrder = np.random.permutation(val)
-            print("sciOrder: ", sciOrder)
             for scientist in sciOrder:
-                print("sciQuery: ", scientist.sciQuery(key, board))
+                scientist.sciQuery(key, board)
+                # print("scientist: ", scientist)
         else:
             val[0].sciQuery(key, board)
+            # print("scientist: ", val[0])
     board.drawBoard(cellsHit, numRun)
     return board
 
@@ -34,6 +34,7 @@ def batchRun(board, numScientists, numRuns):
     """
     Runs the simulation for each of numRuns years.
     During each run, each scientist in the department queries the board.
+    At the end, an animation of the plots of each run is generated.
     """
     dept = [Scientist() for i in range(numScientists)]
 
@@ -42,7 +43,6 @@ def batchRun(board, numScientists, numRuns):
         cellsHit = {}
         for scientist in dept:
             location = scientist.chooseCell(board)
-            print(scientist, location)
             if location in cellsHit.keys():
                 cellsHit[location].append(scientist)
             else:
@@ -51,7 +51,7 @@ def batchRun(board, numScientists, numRuns):
                 # when one scientist ends their career, another is introduced
                 dept.remove(scientist)
                 dept.append(Scientist())
-        print(run(board, cellsHit, j+1))
+        print("Board with payoff values: ", run(board, cellsHit, j+1))
         print()
 
     #animating plots
@@ -61,5 +61,5 @@ def batchRun(board, numScientists, numRuns):
             save_all=True, duration=500, loop=1)
     return
 
-board = Board(2, 2)
-batchRun(board, 4, 10)
+board = Board(5, 5)
+batchRun(board, 10, 10)
