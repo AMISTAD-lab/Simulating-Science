@@ -28,7 +28,7 @@ class Board():
         makes it easier to get a heatmap from a 2D matrix of data"""
         return [[self.board[i][j].payoff for i in range(self.cols)] for j in range(self.rows)]
 
-def drawBoard(self, cellsHit, numRun):
+    def drawBoard(self, cellsHit, numRun):
         """produces a plot of the board for a given run and saves the image"""
         data = self.getPayoffs()
         og = plt.imshow(self.originalPays, cmap="Greens", vmin=0, vmax=30)

@@ -42,7 +42,8 @@ def batchRun(board, numScientists, numRuns):
     for j in range(numRuns):
         # keep track of which cells the scientists are hitting to check overlap
         cellsHit = {}
-        for scientist in dept:
+        for idx in range(len(dept)):
+            scientist = dept[idx]
             location = scientist.chooseCell(board)
             if location in cellsHit.keys():
                 cellsHit[location].append(scientist)
@@ -53,6 +54,7 @@ def batchRun(board, numScientists, numRuns):
                 dept.remove(scientist)
                 dept.append(Scientist())
         print("Board with payoff values: ", run(board, cellsHit, j+1))
+        print("dept: ", dept)
         print()
 
     #animating plots
@@ -64,4 +66,3 @@ def batchRun(board, numScientists, numRuns):
 
 board = Board(5, 5)
 batchRun(board, 10, 10)
-dept

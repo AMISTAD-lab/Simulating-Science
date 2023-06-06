@@ -12,7 +12,7 @@ class Scientist():
     def __repr__(self):
         """String representation of Scientist"""
         return str([self.hindex, self.career, self.citcount])
-        
+
     def cite(self, val):
         """decides if scientist chooses to cite another scientist in the same cell"""
         choice = np.random.randint(0, 2)
@@ -20,12 +20,15 @@ class Scientist():
         # choice = 1 means they don't cite 
         picked = Scientist()
         if choice == 0:
+            #finding scientist with most citations
             maxcit = 0
             maxSci = Scientist()
             for sci in val:
                 if sci.citcount > maxcit:
                     maxcit = sci.citcount
                     maxSci = sci
+            
+            #find the scientist that actually gets cited
             if maxcit < 5:
                 picked = np.random.choice(val)
             else:
