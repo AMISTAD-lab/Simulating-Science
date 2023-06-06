@@ -64,3 +64,4 @@ def batchRun(board, numScientists, numRuns):
 
 board = Board(5, 5)
 batchRun(board, 10, 10)
+dept

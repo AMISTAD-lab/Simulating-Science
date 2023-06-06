@@ -28,16 +28,19 @@ class Board():
         makes it easier to get a heatmap from a 2D matrix of data"""
         return [[self.board[i][j].payoff for i in range(self.cols)] for j in range(self.rows)]
 
-    def drawBoard(self, cellsHit, numRun):
+def drawBoard(self, cellsHit, numRun):
         """produces a plot of the board for a given run and saves the image"""
         data = self.getPayoffs()
+        og = plt.imshow(self.originalPays, cmap="Greens", vmin=0, vmax=30)
+        ogColors = og.cmap(og.norm(og.get_array()))
         plot = plt.imshow(data, cmap="Greens", vmin=0, vmax=30)
         plt.colorbar()
-        # plt.imshow(self.originalPays, cmap="RdYlGn", vmin=0, vmax=30)
 
         for i in range(self.rows):
             for j in range(self.cols):
                 cell = self.board[i][j]
+                # compare to original payoff color
+                plt.axhline(y = j-0.41, xmin = i/self.cols+0.019, xmax = (i+1)/self.cols+0.019, color=ogColors[j][i], linewidth=10)
                 # finding the number of scientists on each cell each round
                 numSciHits = 0
                 if cell.location in cellsHit.keys():
