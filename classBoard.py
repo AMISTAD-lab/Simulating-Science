@@ -10,7 +10,7 @@ class Board():
         self.rows = rows
         self.cols = cols
         # creates biased random number generator with 50% chance of being 0
-        rangeVal = 30
+        self.rangeVal = 30
         self.randomRange = [0 for i in range(rangeVal)]
         [self.randomRange.append(x) for x in range(1, rangeVal+1)]
         # board has random payoff values in each cell, with more bias toward 0
