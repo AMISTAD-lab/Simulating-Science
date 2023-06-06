@@ -23,7 +23,8 @@ def run(board, cellsHit, numRun):
             sciOrder = np.random.permutation(val)
             for scientist in sciOrder:
                 scientist.sciQuery(key, board)
-                # print("scientist: ", scientist)
+                scientist.cite(val)
+                print("scientist: ", scientist)
         else:
             val[0].sciQuery(key, board)
             # print("scientist: ", val[0])
