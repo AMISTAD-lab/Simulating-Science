@@ -11,8 +11,8 @@ class Board():
         self.cols = cols
         # creates biased random number generator with 50% chance of being 0
         self.rangeVal = 30
-        self.randomRange = [0 for i in range(rangeVal)]
-        [self.randomRange.append(x) for x in range(1, rangeVal+1)]
+        self.randomRange = [0 for i in range(self.rangeVal)]
+        [self.randomRange.append(x) for x in range(1, self.rangeVal+1)]
         # board has random payoff values in each cell, with more bias toward 0
         self.board = [[Cell(np.random.choice(self.randomRange), (i, j)) for j in range(self.cols)] for i in range(self.rows)]
         self.discovered = []
@@ -65,5 +65,5 @@ class Board():
                 # add this for debugging payoffs: {f'{cell.payoff:.1f}'}
                 plt.annotate(f"{cell.phase.name[0]}{cell.numHits}", xy = (i, j), xytext=(i-0.15, j+0.075),
                     fontsize=13, fontweight='bold')
-        plt.savefig(f'testplot{numRun}.png')
+        plt.savefig(f'plot{numRun}.png')
         plt.clf()
