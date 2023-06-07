@@ -42,11 +42,11 @@ class Board():
                 # compare to original payoff color
                 plt.axhline(y = j-0.41, xmin = i/self.cols+0.019, xmax = (i+1)/self.cols+0.019, color=ogColors[j][i], linewidth=10)
                 # finding the number of scientists on each cell each round
-                numSciHits = 0
+                cell.numSciHits = 0
                 if cell.location in cellsHit.keys():
-                    numSciHits = len(cellsHit[cell.location])
+                    cell.numSciHits = len(cellsHit[cell.location])
                     # plotting the "dot" scientists
-                    for x in range(1, numSciHits + 1):
+                    for x in range(1, cell.numSciHits + 1):
                         scientist = cellsHit[cell.location][x-1]
                         starFactor = scientist.getStarFactor()
                         if starFactor < 0:

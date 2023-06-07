@@ -6,8 +6,9 @@ class Scientist():
     def __init__(self):
         self.career = np.random.randint(1, 31)
         # citcount and impact corresponds to where you are in your career
-        self.impact = abs(np.random.randint(20 - self.career, 35 - self.career))
-        self.citcount = abs(np.random.randint(20 - self.career, 35 - self.career))
+        # they should be at least one so we don't divide by 0
+        self.impact = abs(np.random.randint(20 - self.career, 35 - self.career)) + 1
+        self.citcount = abs(np.random.randint(20 - self.career, 35 - self.career)) + 1
 
     def __repr__(self):
         """String representation of Scientist"""
@@ -17,30 +18,49 @@ class Scientist():
         """calculates starFactor based on scientist's parameters"""
         overall = ((self.impact-(31 - self.career)) + (self.citcount-(31 - self.career)))/(31 - self.career) 
         return overall
-    
-    def probCell(self, weights, board):
+
+    def probCell(self, board, weights):
         # Define the weights
-        c = weights["citation"]
-        i = weights["impact"]
+        c = weights["citation"] * (1/self.citcount)
+        i = weights["impact"] * (1/self.impact)
         e = weights["exploration"]
 
 
         # Calculate the probabilities for each cell
-        probabilities = np.zeros_like(board)
+        probabilities = np.zeros_like(board.board)
 
         denominator = 0
         for x in range(board.rows):
             for y in range(board.cols):
-                denominator += np.exp((c * self.citcount) + (i * self.impact) + (e * board[x, y]))
+                # i should be associated with board payoff value
+                # e should be associated with numHits on the cell
+                # c should be associated with num scientists on the cell
+                denominator += np.exp((c * board.board[x][y].numSciHits) + (i * board.board[x][y].payoff) + (e * board.board[x][y].numHits))
         for j in range(board.rows):
             for k in range(board.cols):
-                X1 = board[j, k]
+                X1 = board.board[j][k]
                 
-                numerator = np.exp((c * self.citcount) + (i * self.impact) + (e * X1))
+                numerator = np.exp((c * X1.numSciHits) + (i * X1.payoff) + (e * X1.numHits))
                 
-                probabilities[j, k] = numerator / denominator
+                probabilities[j][k] = numerator / denominator
 
         return probabilities
+
+    def chooseCell(self, board, weights):
+        """chooses cell to query"""
+        probs = self.probCell(board, weights)
+
+        flatProbs = [item for sublist in probs for item in sublist]
+        flatBoard = [board.board[i][j].location for j in range(board.cols) for i in range(board.rows)]
+        choice = random.choices(flatBoard, weights=flatProbs, k=1)
+
+        return choice[0]
+
+    def sciQuery(self, location, board):
+        """scientist queries chosen cell"""
+        self.impact += board.board[location[0]][location[1]].cellQuery(board)
+        self.career -= 1
+        return self.impact
 
     def citeProbs(self, val):
         """probability distribution of citing scientists in a cell"""
@@ -72,43 +92,3 @@ class Scientist():
                 if val[i] != self:
                     val[i].citcount += 1
         return
-
-    def probHerd(self):
-        """generate the probability of the scientist following the herd 
-        based on h index and career"""
-        pHerd = abs((self.impact-(31 - self.career))/(31 - self.career))
-        if (self.impact > (31 - self.career)):
-            if pHerd > 1:
-                pHerd = 0
-            else:
-                pHerd = 1 - pHerd
-        else:
-            if pHerd > 1:
-                pHerd = 1
-        return pHerd
-
-    def chooseCell(self, board, weights):
-        """decides which cell the scientist will query according to payoff"""
-        # dictionary of discovered cells' locations and payoff values
-        discoveredPayoffs = {}
-        maxPayoff = 0.0
-
-        for x in board.discovered:
-            discoveredPayoffs.update({board.board[x[0]][x[1]].payoff : board.board[x[0]][x[1]]})
-
-        choice = np.random.binomial(1, self.probHerd())
-        # choice = 1 --> they follow the herd
-        if (choice == 1 and len(list(discoveredPayoffs.keys())) > 0) or (choice == 0 and len(board.undiscovered) == 0):
-                maxPayoff = max(list(discoveredPayoffs.keys()))
-                location = discoveredPayoffs.get(maxPayoff).location
-        # choice = 0 --> choose randomly from undiscovered cells
-        else:
-            location = random.choice(board.undiscovered)
-
-        return location
-
-    def sciQuery(self, location, board):
-        """scientist queries chosen cell"""
-        self.impact += board.board[location[0]][location[1]].cellQuery(board)
-        self.career -= 1
-        return self.impact

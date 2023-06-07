@@ -10,6 +10,7 @@ class Cell():
         self.phase = Phase.experimental
         self.numHits = 0
         self.lowerx, self.upperx = self.logiFunc()
+        self.numSciHits = 0
 
     def __repr__(self):
         "string representation of Cell"
