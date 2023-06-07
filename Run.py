@@ -11,7 +11,7 @@ weights = {
     "exploration" : 0.1
 }
 
-def run(board, cellsHit, numRun, weights):
+def oneRun(board, cellsHit, numRun, weights):
     """runs query simulation for one year"""
     for key, val in cellsHit.items():
         if len(val) > 1:
@@ -49,7 +49,7 @@ def batchRun(board, numScientists, numRuns):
                 # when one scientist ends their career, another is introduced
                 dept.remove(scientist)
                 dept.append(Scientist())
-        print("Board with payoff values: ", run(board, cellsHit, j+1, weights))
+        print("Board with payoff values: ", oneRun(board, cellsHit, j+1, weights))
         print("dept: ", dept)
         print()
 
