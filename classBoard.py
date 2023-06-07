@@ -48,11 +48,17 @@ class Board():
                     # plotting the "dot" scientists
                     for x in range(1, numSciHits + 1):
                         scientist = cellsHit[cell.location][x-1]
-                        starFactor = (scientist.hindex-(31 - scientist.career))/(31 - scientist.career)
+                        starFactor = scientist.getStarFactor()
                         if starFactor < 0:
-                            dotSize = 5 - 5 * starFactor
+                            if (7 - 7 * abs(starFactor)) < 3:
+                                dotSize = 3
+                            else:
+                                dotSize = 7 - 7 * abs(starFactor)
                         else:
-                            dotSize = 5 + 5 * starFactor
+                            if (starFactor) >= 1:
+                                dotSize = 14
+                            else:
+                                dotSize = 7 + 7 * (starFactor)
                         # generate random locations within the cell for the scientist
                         # offset of 0.5 from the way heatmap is generated
                         randX = np.random.uniform(0.1, 0.9)

@@ -5,17 +5,13 @@ from classCell import *
 from classBoard import *
 from classScientist import *
 
-# def make_gif(frame_folder):
-#     frames = [Image.open(image) for image in glob.glob(f"{frame_folder}/*.JPG")]
-#     frame_one = frames[0]
-#     frame_one.save("my_awesome.gif", format="GIF", append_images=frames,
-#             save_all=True, duration=100, loop=0)
-    
-#     if __name__ == "__main__":
-#         make_gif("/path/to/images")
-#     return
+weights = {
+    "citation" : 0.1, 
+    "impact" : 1,
+    "exploration" : 0.1
+}
 
-def run(board, cellsHit, numRun):
+def run(board, cellsHit, numRun, weights):
     """runs query simulation for one year"""
     for key, val in cellsHit.items():
         if len(val) > 1:
@@ -24,7 +20,7 @@ def run(board, cellsHit, numRun):
             for scientist in sciOrder:
                 scientist.sciQuery(key, board)
                 scientist.cite(val)
-                print("scientist: ", scientist)
+                # print("scientist: ", scientist)
         else:
             val[0].sciQuery(key, board)
             # print("scientist: ", val[0])
@@ -44,7 +40,7 @@ def batchRun(board, numScientists, numRuns):
         cellsHit = {}
         for idx in range(len(dept)):
             scientist = dept[idx]
-            location = scientist.chooseCell(board)
+            location = scientist.chooseCell(board, weights)
             if location in cellsHit.keys():
                 cellsHit[location].append(scientist)
             else:
@@ -53,7 +49,7 @@ def batchRun(board, numScientists, numRuns):
                 # when one scientist ends their career, another is introduced
                 dept.remove(scientist)
                 dept.append(Scientist())
-        print("Board with payoff values: ", run(board, cellsHit, j+1))
+        print("Board with payoff values: ", run(board, cellsHit, j+1, weights))
         print("dept: ", dept)
         print()
 
@@ -65,4 +61,4 @@ def batchRun(board, numScientists, numRuns):
     return
 
 board = Board(5, 5)
-batchRun(board, 10, 10)
+batchRun(board, 20, 10)
