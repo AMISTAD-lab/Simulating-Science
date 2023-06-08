@@ -18,6 +18,7 @@ class Board():
         self.discovered = []
         self.undiscovered = [self.board[i][j].location for j in range(self.cols) for i in range(self.rows)]
         self.originalPays = self.getPayoffs()
+        self.totalPayoff = sum(self.flatten(self.originalPays))
 
     def __repr__(self):
         """string representation of Board"""
@@ -27,6 +28,10 @@ class Board():
         """returns the payoff value for each cell of the board in a way that 
         makes it easier to get a heatmap from a 2D matrix of data"""
         return [[self.board[i][j].payoff for i in range(self.cols)] for j in range(self.rows)]
+
+    def flatten(self, matrix):
+        """turns a 2D matrix into a 1D list"""
+        return [matrix[i][j] for j in range(len(matrix[0])) for i in range(len(matrix))]
 
     def drawBoard(self, cellsHit, numRun):
         """produces a plot of the board for a given run and saves the image"""

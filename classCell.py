@@ -50,8 +50,8 @@ class Cell():
         elif self.numHits > self.lowerx:
             self.phase = Phase.breakthrough
             self.hidden = False
-            # right when it changes to breakthrough phase
-            if self.numHits == 2:
+            # "discover" the cell once it hits breakthrough phase
+            if self.location not in board.discovered:
                 board.discovered.append(self.location)
                 board.undiscovered.remove(self.location)
         if self.phase == Phase.experimental:

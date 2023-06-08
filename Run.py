@@ -7,11 +7,11 @@ from classScientist import *
 
 weights = {
     "citation" : 0, 
-    "impact" : 0,
-    "exploration" : 1
+    "impact" : 1,
+    "exploration" : 0.5
 }
 
-def oneRun(board, cellsHit, numRun, weights):
+def oneRun(board, cellsHit, numRun):
     """runs query simulation for one year"""
     for key, val in cellsHit.items():
         if len(val) > 1:
@@ -48,8 +48,13 @@ def batchRun(board, numScientists, numRuns):
                 # when one scientist ends their career, another is introduced
                 dept.remove(scientist)
                 dept.append(Scientist())
-        print("Board with payoff values: ", oneRun(board, cellsHit, j+1, weights))
-        print("dept: ", dept)
+        # print statistics at the end of the run
+        print("Board with payoff values: ", oneRun(board, cellsHit, j+1))
+        print("Department: ", dept)
+        currTotal = sum(board.flatten(board.getPayoffs()))
+        print("Percentage of total payoff discovered: ", f"{((board.totalPayoff - currTotal)/board.totalPayoff)*100:.2f}")
+        print("Percentage of cells discovered (that entered into breakthrough phase): ",
+               f"{(len(board.discovered)/len(board.flatten(board.board)))*100:.2f}")
         print()
 
     #animating plots
@@ -59,5 +64,5 @@ def batchRun(board, numScientists, numRuns):
             save_all=True, duration=500, loop=1)
     return
 
-board = Board(2, 2)
-batchRun(board, 3, 10)
+board = Board(5, 5)
+batchRun(board, 20, 20)

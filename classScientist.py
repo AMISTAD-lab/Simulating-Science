@@ -69,9 +69,10 @@ class Scientist():
     def chooseCell(self, board, weights):
         """chooses cell to query"""
         probs = self.probCell(board, weights)
-
-        flatProbs = [item for sublist in probs for item in sublist]
+    
         flatBoard = [board.board[i][j].location for j in range(board.cols) for i in range(board.rows)]
+        flatProbs = board.flatten(probs)
+
         choice = random.choices(flatBoard, weights=flatProbs, k=1)
         
         return choice[0]
