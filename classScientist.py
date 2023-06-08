@@ -25,22 +25,23 @@ class Scientist():
         i = weights["impact"] * (1/self.impact)
         e = weights["exploration"]
 
-
         # Calculate the probabilities for each cell
         probabilities = np.zeros_like(board.board)
-
         denominator = 0
         for x in range(board.rows):
             for y in range(board.cols):
                 # i should be associated with board payoff value
                 # e should be associated with numHits on the cell
                 # c should be associated with num scientists on the cell
-                denominator += np.exp((c * board.board[x][y].numSciHits) + (i * board.board[x][y].payoff) + (e * board.board[x][y].numHits))
+                # scientists see how much payoff has been extracted (visiblePayoff)
+                visiblePayoff = (board.originalPays[y][x] - board.board[x][y].payoff)
+                denominator += np.exp((c * board.board[x][y].numSciHits) + (i * visiblePayoff) + (e * 1/(1+board.board[x][y].numHits)))
         for j in range(board.rows):
             for k in range(board.cols):
                 X1 = board.board[j][k]
+                visiblePayoff = (board.originalPays[k][j] - board.board[j][k].payoff)
                 
-                numerator = np.exp((c * X1.numSciHits) + (i * X1.payoff) + (e * X1.numHits))
+                numerator = np.exp((c * X1.numSciHits) + (i * visiblePayoff) + (e * 1/(1 + X1.numHits)))
                 
                 probabilities[j][k] = numerator / denominator
 
@@ -80,15 +81,11 @@ class Scientist():
         """decides which other scientists in the cell get cited"""
         probs = self.citeProbs(val)
 
-        # if choosing 1 scientist to cite
-        # choice = random.choices(val, weights=probs, k=1)
-        # if choice != self:
-        #     choice.citcount += 1
-
-        # if choosing multiple people to cite
-        for i in range(len(val)):
-            if probs[i] > (1/len(val)):
-                # taking out self citing
-                if val[i] != self:
-                    val[i].citcount += 1
+        # randomly choose how many other scientists to cite, not including themselves
+        numCites = np.random.randint(0, len(val) + 1)
+        
+        choice = random.choices(val, weights=probs, k=numCites)
+        for elem in choice:
+            if elem != self:
+                elem.citcount += 1
         return
