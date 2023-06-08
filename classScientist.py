@@ -20,10 +20,29 @@ class Scientist():
         return overall
 
     def probCell(self, board, weights):
-        # Define the weights
-        c = weights["citation"] * (1/self.citcount)
-        i = weights["impact"] * (1/self.impact)
+        """"generates a probability distribution over the cells"""
+        citToCareer = (self.citcount-(31 - self.career))
+        # if they have a low citToCareer difference, then they value citations more
+        if citToCareer < 0:
+            c = weights["citation"] * abs(citToCareer)
+        elif citToCareer == 0:
+            c = weights["citation"]
+        # if they have a high citToCareer difference, then they value citations less
+        else:
+            c = weights["citation"] * (1/citToCareer)
+
+        impactToCareer = (self.impact-(31 - self.career))
+        # if they have a low impactToCareer difference, then they value impact more
+        if impactToCareer < 0:
+            i = weights["impact"] * abs(impactToCareer)
+        elif impactToCareer == 0:
+            i = weights["impact"]
+        # if they have a high impactToCareer difference, then they value impact less
+        else:
+            i = weights["impact"] * (1/impactToCareer)
+
         e = weights["exploration"]
+        print("cie: ", c, i, e)
 
         # Calculate the probabilities for each cell
         probabilities = np.zeros_like(board.board)
@@ -54,7 +73,7 @@ class Scientist():
         flatProbs = [item for sublist in probs for item in sublist]
         flatBoard = [board.board[i][j].location for j in range(board.cols) for i in range(board.rows)]
         choice = random.choices(flatBoard, weights=flatProbs, k=1)
-
+        
         return choice[0]
 
     def sciQuery(self, location, board):

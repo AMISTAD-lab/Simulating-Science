@@ -6,9 +6,9 @@ from classBoard import *
 from classScientist import *
 
 weights = {
-    "citation" : 0.1, 
-    "impact" : 1,
-    "exploration" : 0.1
+    "citation" : 0, 
+    "impact" : 0,
+    "exploration" : 1
 }
 
 def oneRun(board, cellsHit, numRun, weights):
@@ -34,7 +34,6 @@ def batchRun(board, numScientists, numRuns):
     At the end, an animation of the plots of each run is generated.
     """
     dept = [Scientist() for i in range(numScientists)]
-
     for j in range(numRuns):
         # keep track of which cells the scientists are hitting to check overlap
         cellsHit = {}
@@ -60,5 +59,5 @@ def batchRun(board, numScientists, numRuns):
             save_all=True, duration=500, loop=1)
     return
 
-board = Board(5, 5)
-batchRun(board, 20, 10)
+board = Board(2, 2)
+batchRun(board, 3, 10)
