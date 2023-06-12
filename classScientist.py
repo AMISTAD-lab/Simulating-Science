@@ -42,7 +42,7 @@ class Scientist():
             i = weights["impact"] * (1/impactToCareer)
 
         e = weights["exploration"]
-        print("cie: ", c, i, e)
+        # print("cie: ", c, i, e)
 
         # Calculate the probabilities for each cell
         probabilities = np.zeros_like(board.board)

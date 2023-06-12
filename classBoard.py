@@ -1,7 +1,5 @@
-import seaborn as sn
 import matplotlib.pyplot as plt
 import numpy as np
-import math
 from phase import *
 from classCell import *
 

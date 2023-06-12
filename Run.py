@@ -1,5 +1,3 @@
-import seaborn as sn
-import glob
 from PIL import Image
 from classCell import *
 from classBoard import *
