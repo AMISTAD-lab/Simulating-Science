@@ -5,14 +5,24 @@ from phase import *
 from classCell import *
 
 class Board():
-    def __init__(self, rows, cols):
+    def __init__(self, rows, cols, probzero):
         self.rows = rows
         self.cols = cols
-        # creates biased random number generator with 50% chance of being 0
+        self.probzero = probzero
+
+        #Max payoff value
         self.rangeVal = 30
-        self.randomRange = [0 for i in range(self.rangeVal)]
+
+        #adds # of desired zeros
+        self.randomRange = [0 for i in range(probzero)]
+
+        #this makes 1,2,3...30 (payoff values)
         [self.randomRange.append(x) for x in range(1, self.rangeVal+1)]
-        # board has random payoff values in each cell, with more bias toward 0
+
+        #shuffles the array (so its not just  [0,0,1,2] but random [2,0,1,0])
+        np.random.shuffle(self.randomRange)
+
+        # board has random payoff values in each cell
         self.board = [[Cell(np.random.choice(self.randomRange), (i, j)) for j in range(self.cols)] for i in range(self.rows)]
         self.discovered = []
         self.undiscovered = [self.board[i][j].location for j in range(self.cols) for i in range(self.rows)]
@@ -39,6 +49,7 @@ class Board():
         plotColors = plot.cmap(plot.norm(plot.get_array()))
         original = plt.imshow(self.originalPays, cmap="Greens", vmin=0, vmax=30)
         plt.colorbar()
+        plt.axis("off")
         # fig, ax = plt.subplots()
 
         for i in range(self.rows):
@@ -46,12 +57,20 @@ class Board():
                 cell = self.board[i][j]
 
                 # compare to original payoff color
-                plt.axhline(y = j-0.41, xmin = i/self.cols+0.019, xmax = (i+1)/self.cols+0.019, color=plotColors[j][i], linewidth=10)
-
-                # rect = patches.Rectangle((i, j), 4, 4, linewidth=1, edgecolor='r', )
-
-                # ax.add_patch(rect)
-
+                
+                # we want at least some of the original payoff to show
+                if self.originalPays[j][i] != 0:
+                    if cell.payoff/self.originalPays[j][i] < 0.1:
+                        rect=patches.Rectangle((i-0.5,j-0.5),
+                                1, 0.9,
+                                fill=True,
+                                color=plotColors[j][i])
+                    else:
+                        rect=patches.Rectangle((i-0.5,j-0.5),
+                                1, (1 - (cell.payoff/self.originalPays[j][i])),
+                                fill=True,
+                                color=plotColors[j][i])
+                    plt.gca().add_patch(rect)
                 # finding the number of scientists on each cell each round
                 cell.numSciHits = 0
                 if cell.location in cellsHit.keys():

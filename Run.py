@@ -49,8 +49,8 @@ def batchRun(board, numScientists, numRuns):
         # print statistics at the end of the run
         print("Board with payoff values: ", oneRun(board, cellsHit, j+1))
         # print("Department: ", dept)
-        print()
     currTotal = sum(board.flatten(board.getPayoffs()))
+    print()
     print("Percentage of total payoff discovered: ", f"{((board.totalPayoff - currTotal)/board.totalPayoff)*100:.2f}")
     print("Percentage of cells discovered (that entered into breakthrough phase): ",
             f"{(len(board.discovered)/len(board.flatten(board.board)))*100:.2f}")
@@ -63,5 +63,5 @@ def batchRun(board, numScientists, numRuns):
             save_all=True, duration=500, loop=1)
     return
 
-board = Board(5, 5)
-batchRun(board, 20, 20)
+board = Board(3, 3, 30)
+batchRun(board, 4, 20)
