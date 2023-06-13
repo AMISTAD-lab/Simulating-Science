@@ -48,15 +48,16 @@ def batchRun(board, numScientists, numRuns):
                 dept.append(Scientist())
         # print statistics at the end of the run
         print("Board with payoff values: ", oneRun(board, cellsHit, j+1))
-        print("Department: ", dept)
-        currTotal = sum(board.flatten(board.getPayoffs()))
-        print("Percentage of total payoff discovered: ", f"{((board.totalPayoff - currTotal)/board.totalPayoff)*100:.2f}")
-        print("Percentage of cells discovered (that entered into breakthrough phase): ",
-               f"{(len(board.discovered)/len(board.flatten(board.board)))*100:.2f}")
+        # print("Department: ", dept)
         print()
+    currTotal = sum(board.flatten(board.getPayoffs()))
+    print("Percentage of total payoff discovered: ", f"{((board.totalPayoff - currTotal)/board.totalPayoff)*100:.2f}")
+    print("Percentage of cells discovered (that entered into breakthrough phase): ",
+            f"{(len(board.discovered)/len(board.flatten(board.board)))*100:.2f}")
+    print()
 
     #animating plots
-    frames = [Image.open(f'plot{i+1}.png') for i in range(numRuns)]
+    frames = [Image.open(f'plots/plot{i+1}.png') for i in range(numRuns)]
     frame_one = frames[0]
     frame_one.save("animation.gif", format="GIF", append_images=frames,
             save_all=True, duration=500, loop=1)

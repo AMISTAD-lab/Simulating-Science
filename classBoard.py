@@ -1,4 +1,5 @@
 import matplotlib.pyplot as plt
+import matplotlib.patches as patches
 import numpy as np
 from phase import *
 from classCell import *
@@ -34,16 +35,23 @@ class Board():
     def drawBoard(self, cellsHit, numRun):
         """produces a plot of the board for a given run and saves the image"""
         data = self.getPayoffs()
-        og = plt.imshow(self.originalPays, cmap="Greens", vmin=0, vmax=30)
-        ogColors = og.cmap(og.norm(og.get_array()))
         plot = plt.imshow(data, cmap="Greens", vmin=0, vmax=30)
+        plotColors = plot.cmap(plot.norm(plot.get_array()))
+        original = plt.imshow(self.originalPays, cmap="Greens", vmin=0, vmax=30)
         plt.colorbar()
+        # fig, ax = plt.subplots()
 
         for i in range(self.rows):
             for j in range(self.cols):
                 cell = self.board[i][j]
+
                 # compare to original payoff color
-                plt.axhline(y = j-0.41, xmin = i/self.cols+0.019, xmax = (i+1)/self.cols+0.019, color=ogColors[j][i], linewidth=10)
+                plt.axhline(y = j-0.41, xmin = i/self.cols+0.019, xmax = (i+1)/self.cols+0.019, color=plotColors[j][i], linewidth=10)
+
+                # rect = patches.Rectangle((i, j), 4, 4, linewidth=1, edgecolor='r', )
+
+                # ax.add_patch(rect)
+
                 # finding the number of scientists on each cell each round
                 cell.numSciHits = 0
                 if cell.location in cellsHit.keys():
@@ -74,5 +82,8 @@ class Board():
                 # add this for debugging payoffs: {f'{cell.payoff:.1f}'}
                 plt.annotate(f"{cell.phase.name[0]}{cell.numHits}", xy = (i, j), xytext=(i-0.15, j+0.075),
                     fontsize=13, fontweight='bold')
-        plt.savefig(f'plot{numRun}.png')
+        plt.savefig(f'plots/plot{numRun}.png')
         plt.clf()
+        plt.cla()
+        plt.close()
+        # fig.clf()

@@ -21,28 +21,29 @@ class Scientist():
 
     def probCell(self, board, weights):
         """"generates a probability distribution over the cells"""
+        print()
         citToCareer = (self.citcount-(31 - self.career))
+        print("cit, career, citToCareer: ", self.citcount, self.career, citToCareer)
         # if they have a low citToCareer difference, then they value citations more
-        if citToCareer < 0:
+        if citToCareer <= -1:
             c = weights["citation"] * abs(citToCareer)
-        elif citToCareer == 0:
-            c = weights["citation"]
-        # if they have a high citToCareer difference, then they value citations less
-        else:
+        elif citToCareer >= 1:
             c = weights["citation"] * (1/citToCareer)
+        else:
+            c = weights["citation"]
 
         impactToCareer = (self.impact-(31 - self.career))
+        print("impact, career, impactToCareer: ", self.impact, self.career, impactToCareer)
         # if they have a low impactToCareer difference, then they value impact more
-        if impactToCareer < 0:
+        if impactToCareer <= -1:
             i = weights["impact"] * abs(impactToCareer)
-        elif impactToCareer == 0:
-            i = weights["impact"]
-        # if they have a high impactToCareer difference, then they value impact less
-        else:
+        elif impactToCareer >= 1:
             i = weights["impact"] * (1/impactToCareer)
+        else:
+            i = weights["impact"]
 
         e = weights["exploration"]
-        # print("cie: ", c, i, e)
+        print("cie: ", c, i, e)
 
         # Calculate the probabilities for each cell
         probabilities = np.zeros_like(board.board)
