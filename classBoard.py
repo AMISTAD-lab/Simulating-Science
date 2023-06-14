@@ -61,15 +61,17 @@ class Board():
                 # we want at least some of the original payoff to show
                 if self.originalPays[j][i] != 0:
                     if cell.payoff/self.originalPays[j][i] < 0.1:
-                        rect=patches.Rectangle((i-0.5,j-0.5),
+                        rect=patches.Rectangle((i-0.5,j-0.51),
                                 1, 0.9,
                                 fill=True,
-                                color=plotColors[j][i])
+                                color=plotColors[j][i],
+                                linewidth=0.2)
                     else:
-                        rect=patches.Rectangle((i-0.5,j-0.5),
+                        rect=patches.Rectangle((i-0.5,j-0.51),
                                 1, (1 - (cell.payoff/self.originalPays[j][i])),
                                 fill=True,
-                                color=plotColors[j][i])
+                                color=plotColors[j][i],
+                                linewidth=0.2)
                     plt.gca().add_patch(rect)
                 # finding the number of scientists on each cell each round
                 cell.numSciHits = 0
