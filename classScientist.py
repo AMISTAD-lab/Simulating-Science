@@ -23,6 +23,7 @@ class Scientist():
         """"generates a probability distribution over the cells"""
         citToCareer = (self.citcount-(31 - self.career))
         # if they have a low citToCareer difference, then they value citations more
+        # also, ensure numbers are in reasonable range
         if citToCareer <= -1:
             c = weights["citation"] * abs(citToCareer)
         elif citToCareer >= 1:
@@ -87,9 +88,27 @@ class Scientist():
 
         denominator = 0
         for sci in val:
-            denominator += np.exp(sci.getStarFactor()) 
+            star = sci.getStarFactor()
+            # ensure numbers are in reasonable range
+            if star <= -1:
+                star = 1/abs(star)
+            elif star >= 1:
+                star = star
+            else:
+                star = 1
+
+            denominator += np.exp(star) 
+
         for i in range(len(val)):
-            numerator = np.exp(val[i].getStarFactor())
+            star = val[i].getStarFactor()
+            if star <= -1:
+                star = 1/abs(star)
+            elif star >= 1:
+                star = star
+            else:
+                star = 1
+
+            numerator = np.exp(star)
             probabilities[i] = numerator / denominator
 
         return probabilities

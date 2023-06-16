@@ -50,14 +50,11 @@ class Board():
         original = plt.imshow(self.originalPays, cmap="Greens", vmin=0, vmax=30)
         plt.colorbar()
         plt.axis("off")
-        # fig, ax = plt.subplots()
 
         for i in range(self.rows):
             for j in range(self.cols):
                 cell = self.board[i][j]
-
                 # compare to original payoff color
-                
                 # we want at least some of the original payoff to show
                 if self.originalPays[j][i] != 0:
                     if cell.payoff/self.originalPays[j][i] < 0.1:
@@ -65,13 +62,13 @@ class Board():
                                 1, 0.9,
                                 fill=True,
                                 color=plotColors[j][i],
-                                linewidth=0.2)
+                                linewidth=0.4)
                     else:
                         rect=patches.Rectangle((i-0.5,j-0.51),
                                 1, (1 - (cell.payoff/self.originalPays[j][i])),
                                 fill=True,
                                 color=plotColors[j][i],
-                                linewidth=0.2)
+                                linewidth=0.4)
                     plt.gca().add_patch(rect)
                 # finding the number of scientists on each cell each round
                 cell.numSciHits = 0
@@ -103,8 +100,18 @@ class Board():
                 # add this for debugging payoffs: {f'{cell.payoff:.1f}'}
                 plt.annotate(f"{cell.phase.name[0]}{cell.numHits}", xy = (i, j), xytext=(i-0.15, j+0.075),
                     fontsize=13, fontweight='bold')
+                gridlines = patches.Rectangle((i-0.5,j-0.5),
+                                1, 1,
+                                fill=False,
+                                color="k",
+                                linewidth=2)
+                plt.gca().add_patch(gridlines)
+        # finish plotting gridlines on the edges of the board
+        plt.axhline(self.rows-0.5, linewidth=4, color="k")
+        plt.axvline(-0.5, ymax=0.94, linewidth=4, color="k")
+        plt.axvline(self.cols-0.5, ymax=0.94, linewidth=4, color="k")
+
         plt.savefig(f'plots/plot{numRun}.png')
         plt.clf()
         plt.cla()
         plt.close()
-        # fig.clf()

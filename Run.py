@@ -5,8 +5,8 @@ from classScientist import *
 
 weights = {
     "citation" : 0, 
-    "impact" : 1,
-    "exploration" : 0.5
+    "impact" : 0.1,
+    "exploration" : 1
 }
 
 def oneRun(board, cellsHit, numRun):
@@ -47,7 +47,9 @@ def batchRun(board, numScientists, numRuns):
                 dept.remove(scientist)
                 dept.append(Scientist())
         # print statistics at the end of the run
+        print()
         print("Board with payoff values: ", oneRun(board, cellsHit, j+1))
+        print()
         # print("Department: ", dept)
     currTotal = sum(board.flatten(board.getPayoffs()))
     print()
@@ -63,5 +65,5 @@ def batchRun(board, numScientists, numRuns):
             save_all=True, duration=500, loop=1)
     return
 
-board = Board(3, 3, 30)
-batchRun(board, 4, 20)
+board = Board(3, 3, 0)
+batchRun(board, 20, 50)
