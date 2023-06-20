@@ -66,4 +66,4 @@ def batchRun(board, numScientists, numRuns):
     return
 
 board = Board(3, 3, 0)
-batchRun(board, 20, 50)
+batchRun(board, 20, 20)
