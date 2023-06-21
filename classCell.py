@@ -1,13 +1,10 @@
 import numpy as np
-from phase import *
 import math
 
 class Cell():
     def __init__(self, payoff, location):
         self.payoff = payoff
         self.location = location
-        self.hidden = True
-        self.phase = Phase.experimental
         self.numHits = 0
         self.lowerx, self.upperx, self.yList = self.logiFunc(15, 10)
         self.stepSize, self.slopeVals = self.setStepSize(10, 0.5)
@@ -39,6 +36,10 @@ class Cell():
                     highSuccess = True
             
             xmax = min(upperx)
+            #finds the y value (proportion) at given x in the logistic function
+            self.incHit = float(1/(1 + math.pow(math.e, -steepness*(xmax-center))))
+            self.breakHit = float(1/(1 + math.pow(math.e, -steepness*(lowerx-center))))
+
             #Goal: to get from x=0 to x=xmax in ksteps
             # - Chop interval into N pieces
             yList = []
@@ -52,9 +53,6 @@ class Cell():
         slopeVals = {}
         # - for Scientist at time i, flip coin (with probability p) D times (number of microsteps)
         stepSize = np.random.binomial(D*2, p, size=None)
-
-        print("location: ", self.location)
-        print("stepSize: ", stepSize)
 
         #putting the slopes in a dictionary
         prevY = 0
@@ -75,16 +73,8 @@ class Cell():
         sciPayoff = 0.0
         self.setStepSize(10, 0.5)
 
-        if self.numHits > self.upperx:
-            self.phase = Phase.incremental
-        elif self.numHits > self.lowerx:
-            self.phase = Phase.breakthrough
-            self.hidden = False
-            # "discover" the cell once it hits breakthrough phase
-            if self.location not in board.discovered:
-                board.discovered.append(self.location)
-                board.undiscovered.remove(self.location)
-        if self.phase == Phase.incremental:
+        originalPay = board.originalPays[self.location[1]][self.location[0]]
+        if self.payoff/originalPay >= self.incHit-1:
             frac = np.random.random()
         else:
             frac = self.slopeVals[self.numHits]

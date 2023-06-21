@@ -1,7 +1,6 @@
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
 import numpy as np
-from phase import *
 from classCell import *
 
 class Board():
@@ -24,8 +23,6 @@ class Board():
 
         # board has random payoff values in each cell
         self.board = [[Cell(np.random.choice(self.randomRange), (i, j)) for j in range(self.cols)] for i in range(self.rows)]
-        self.discovered = []
-        self.undiscovered = [self.board[i][j].location for j in range(self.cols) for i in range(self.rows)]
         self.originalPays = self.getPayoffs()
         self.totalPayoff = sum(self.flatten(self.originalPays))
 
@@ -36,6 +33,7 @@ class Board():
     def getPayoffs(self):
         """returns the payoff value for each cell of the board in a way that 
         makes it easier to get a heatmap from a 2D matrix of data"""
+        # note that the x and y coordinates were flipped to make the heatmap
         return [[self.board[i][j].payoff for i in range(self.cols)] for j in range(self.rows)]
 
     def flatten(self, matrix):
@@ -98,8 +96,6 @@ class Board():
                 # annotating cells (phase, numHits)
                 # (ex: B5 means breakthrough phase, hit 5 times)
                 # add this for debugging payoffs: {f'{cell.payoff:.1f}'}
-                plt.annotate(f"{cell.phase.name[0]}{cell.numHits}", xy = (i, j), xytext=(i-0.15, j+0.075),
-                    fontsize=13, fontweight='bold')
                 gridlines = patches.Rectangle((i-0.5,j-0.5),
                                 1, 1,
                                 fill=False,

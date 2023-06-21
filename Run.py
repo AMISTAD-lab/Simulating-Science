@@ -54,8 +54,6 @@ def batchRun(board, numScientists, numRuns):
     currTotal = sum(board.flatten(board.getPayoffs()))
     print()
     print("Percentage of total payoff discovered: ", f"{((board.totalPayoff - currTotal)/board.totalPayoff)*100:.2f}")
-    print("Percentage of cells discovered (that entered into breakthrough phase): ",
-            f"{(len(board.discovered)/len(board.flatten(board.board)))*100:.2f}")
     print()
 
     #animating plots
@@ -65,5 +63,5 @@ def batchRun(board, numScientists, numRuns):
             save_all=True, duration=500, loop=1)
     return
 
-board = Board(3, 3, 0)
+board = Board(5, 5, 0)
 batchRun(board, 20, 20)
