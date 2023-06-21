@@ -20,7 +20,8 @@ class Cell():
 
         while lowSuccess == False or highSuccess == False:
             # set steepness and center parameters for logistic function
-            steepness = np.random.randint(1, 11)
+            steepOptions = [x for x in np.arange(0.3, 7, 0.1)]
+            steepness = np.random.choice(steepOptions)
             center = np.random.randint(0, 15)
             lowerx = 0
             upperx = []
