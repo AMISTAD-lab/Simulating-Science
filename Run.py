@@ -1,4 +1,5 @@
 from PIL import Image
+import numpy as np
 from classCell import *
 from classBoard import *
 from classScientist import *
@@ -7,6 +8,13 @@ weights = {
     "citation" : 0, 
     "impact" : 0.1,
     "exploration" : 1
+}
+
+funding = {
+    "total" : 50,
+    "decrease" : 1,
+    "replenishTime" : 5,
+    "minimum" : 10
 }
 
 def oneRun(board, cellsHit, numRun):
@@ -25,6 +33,42 @@ def oneRun(board, cellsHit, numRun):
     board.drawBoard(cellsHit, numRun)
     return board
 
+def distributeFunding(dept):
+    """
+    distribute the funding allotted for each board
+    """
+    denominator = 0
+    probabilities = np.zeros_like(dept)
+    for sci in dept:
+        star = sci.getStarFactor()
+        # ensure numbers are in reasonable range
+        if star <= -1:
+            star = 1/abs(star)
+        elif star >= 1:
+            star = star
+        else:
+            star = 1
+
+        denominator += np.exp(star)
+
+    for i in range(len(dept)):
+        star = dept[i].getStarFactor()
+        if star <= -1:
+            star = 1/abs(star)
+        elif star >= 1:
+            star = star
+        else:
+            star = 1
+
+        numerator = np.exp(star)
+        probabilities[i] = numerator / denominator
+        # distribute funding based on starFactor for each scientist compared to whole department
+        dept[i].funding += probabilities[i] * funding["total"]
+        # dept[i].funding += funding["total"]/(len(dept))
+
+    return [sci.funding for sci in dept]
+    # go through scientists, add to their funding proportion of total
+
 def batchRun(board, numScientists, numRuns):
     """
     Runs the simulation for each of numRuns years.
@@ -32,17 +76,22 @@ def batchRun(board, numScientists, numRuns):
     At the end, an animation of the plots of each run is generated.
     """
     dept = [Scientist() for i in range(numScientists)]
+    print("ogFunding: ", [sci.funding for sci in dept])
     for j in range(numRuns):
         # keep track of which cells the scientists are hitting to check overlap
+        if j % funding["replenishTime"] == 0:
+            print("funding: ", distributeFunding(dept))
+
         cellsHit = {}
         for idx in range(len(dept)):
             scientist = dept[idx]
+            scientist.funding -= funding["decrease"]
             location = scientist.chooseCell(board, weights)
             if location in cellsHit.keys():
                 cellsHit[location].append(scientist)
             else:
                 cellsHit.update({location : [scientist]})
-            if scientist.career == 0:
+            if (scientist.career == 0) or (scientist.funding <= funding["minimum"]):
                 # when one scientist ends their career, another is introduced
                 dept.remove(scientist)
                 dept.append(Scientist())
@@ -64,4 +113,4 @@ def batchRun(board, numScientists, numRuns):
     return
 
 board = Board(5, 5, 0)
-batchRun(board, 20, 20)
+batchRun(board, numScientists=10, numRuns=20)

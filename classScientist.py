@@ -9,6 +9,7 @@ class Scientist():
         # they should be at least one so we don't divide by 0
         self.impact = abs(np.random.randint(20 - self.career, 35 - self.career)) + 1
         self.citcount = abs(np.random.randint(20 - self.career, 35 - self.career)) + 1
+        self.funding = abs(np.random.randint(20 - self.career, 35 - self.career)) + 1
 
     def __repr__(self):
         """String representation of Scientist"""
@@ -16,7 +17,9 @@ class Scientist():
 
     def getStarFactor(self):
         """calculates starFactor based on scientist's parameters"""
-        overall = ((self.impact-(31 - self.career)) + (self.citcount-(31 - self.career)))/(31 - self.career) 
+        num = (self.impact-(31 - self.career)) + (self.citcount-(31 - self.career)) + (self.funding-(31 - self.career))
+        denom = (31 - self.career) 
+        overall = num/denom
         return overall
 
     def probCell(self, board, weights):
