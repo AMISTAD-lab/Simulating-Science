@@ -12,10 +12,13 @@ class Cell():
         self.funds = 0
 
     def __repr__(self):
-        "string representation of Cell"
+        """string representation of Cell"""
         return str(self.payoff)
 
     def logiFunc(self, N, D):
+        """
+        model payoff extraction for each cell as a randomized logistic function
+        """
         lowSuccess = False
         highSuccess  = False
 
@@ -52,6 +55,9 @@ class Cell():
         return lowerx, xmax, yList
 
     def setStepSize(self, D, p):
+        """
+        split the steps along the logistic function into randomized microsteps
+        """
         slopeVals = {}
         # - for Scientist at time i, flip coin (with probability p) D times (number of microsteps)
         stepSize = np.random.binomial(D*2, p, size=None)

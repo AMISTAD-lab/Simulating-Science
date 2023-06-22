@@ -49,6 +49,102 @@ class Board():
         """turns a 2D matrix into a 1D list"""
         return [matrix[i][j] for j in range(len(matrix[0])) for i in range(len(matrix))]
 
+    def distributeFundingSci(self, dept, cellFunding):
+        """
+        distribute the funding allotted for each cell to the scientists in the cell
+        """
+        denominator = 0
+        probabilities = np.zeros_like(dept)
+        for sci in dept:
+            star = sci.getStarFactor()
+            # ensure numbers are in reasonable range
+            if star <= -1:
+                star = 1/abs(star)
+            elif star >= 1:
+                star = star
+            else:
+                star = 1
+            denominator += np.exp(star)
+
+        for i in range(len(dept)):
+            star = dept[i].getStarFactor()
+            if star <= -1:
+                star = 1/abs(star)
+            elif star >= 1:
+                star = star
+            else:
+                star = 1
+            numerator = np.exp(star)
+            
+            probabilities[i] = numerator / denominator
+            # distribute funding based on starFactor for each scientist compared to whole department
+            dept[i].funding += probabilities[i] * cellFunding
+
+        return [sci.funding for sci in dept]
+
+    def distributeFundingCell(self, chooseCellToFund, funding):
+        """distributes funding to each cell based on input weights"""
+        # Calculate the probabilities for each cell
+        probabilities = np.zeros_like(self.board)
+        denominator = 0
+        for x in range(self.rows):
+            for y in range(self.cols):
+                cell = self.board[x][y]
+                #find the average of scientists' starFactors in this cell
+                starSum = 0
+                avgStarSum = 0
+                if cell.location in self.cellsHit.keys():
+                    for sci in self.cellsHit[cell.location]:
+                        starSum += sci.getStarFactor()
+                    avgStarSum = starSum/cell.numSciHits
+
+                # account for the fact that starFactor can be negative
+                if avgStarSum <= -1:
+                    starWeight = chooseCellToFund["starFactor"] * 1/abs(avgStarSum)
+                elif avgStarSum >= 1:
+                    starWeight = chooseCellToFund["starFactor"] * (avgStarSum)
+                else:
+                    starWeight = chooseCellToFund["starFactor"]
+                #calculates the rest of the weights
+                visWeight = chooseCellToFund["visPayoff"] * (self.getVisPayoff(cell.location))
+                numHitsWeight = chooseCellToFund["numHits"] * (cell.numHits)
+                recentHitsWeight = chooseCellToFund["numSciHits"] * (cell.numSciHits)
+
+                #Note: magic number 3 
+                denominator += (visWeight + starWeight + numHitsWeight + recentHitsWeight)**3
+        
+        for j in range(self.rows):
+            for k in range(self.cols):
+                cell = self.board[j][k]
+                #find the average of scientists' starFactors in this cell
+                starSum = 0
+                avgStarSum = 0
+                if cell.location in self.cellsHit.keys():
+                    for sci in self.cellsHit[cell.location]:
+                        starSum += sci.getStarFactor()
+                    avgStarSum = starSum/cell.numSciHits
+
+                # account for the fact that starFactor can be negative
+                if avgStarSum <= -1:
+                    starWeight = chooseCellToFund["starFactor"] * 1/abs(avgStarSum)
+                elif avgStarSum >= 1:
+                    starWeight = chooseCellToFund["starFactor"] * (avgStarSum)
+                else:
+                    starWeight = chooseCellToFund["starFactor"]
+
+                visWeight = chooseCellToFund["visPayoff"] * (self.getVisPayoff(cell.location))
+                numHitsWeight = chooseCellToFund["numHits"] * (cell.numHits)
+                recentHitsWeight = chooseCellToFund["numSciHits"] * (cell.numSciHits)
+
+                numerator = (visWeight + starWeight + numHitsWeight + recentHitsWeight)**3
+                probabilities[j][k] = numerator / denominator
+
+                #fund cell and then scientist based on probabilities
+                cell.funds = probabilities[j][k] * funding["total"]
+                if cell.location in self.cellsHit.keys():
+                    self.distributeFundingSci(self.cellsHit[cell.location], cell.funds)
+        return probabilities
+
     def drawBoard(self, cellsHit, numRun):
         """produces a plot of the board for a given run and saves the image"""
         data = self.getPayoffs()
