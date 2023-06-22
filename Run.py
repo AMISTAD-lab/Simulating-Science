@@ -5,10 +5,10 @@ from classBoard import *
 from classScientist import *
 
 weights = {
-    "citation" : 0, 
-    "impact" : 0.1,
-    "exploration" : 1,
-    "funding" : 0
+    "citation" : 0.5, 
+    "impact" : 0.5,
+    "exploration" : 0.5,
+    "funding" : 0.5
 }
 
 funding = {
@@ -19,10 +19,10 @@ funding = {
 }
 
 chooseCellToFund = {
-    "visPayoff" : 0,
-    "starFactor" : 0,
-    "numHits" : 0,
-    "numSciHits" : 0
+    "visPayoff" : 0.5,
+    "starFactor" : 0.5,
+    "numHits" : 0.5,
+    "numSciHits" : 0.5
 }
 
 def oneRun(board, cellsHit, numRun):
@@ -47,6 +47,7 @@ def distributeFundingSci(dept, cellFunding):
     probabilities = np.zeros_like(dept)
     for sci in dept:
         star = sci.getStarFactor()
+        # print("star: ", star)
         # ensure numbers are in reasonable range
         if star <= -1:
             star = 1/abs(star)
@@ -102,8 +103,11 @@ def distributeFundingCell(board):
             visWeight = chooseCellToFund["visPayoff"] * (board.getVisPayoff(cell.location))
             numHitsWeight = chooseCellToFund["numHits"] * (cell.numHits)
             recentHitsWeight = chooseCellToFund["numSciHits"] * (cell.numSciHits)
+            # print("fundingWeights: ", starWeight, visWeight, numHitsWeight, recentHitsWeight)
 
-            denominator += np.exp(visWeight + starWeight + numHitsWeight + recentHitsWeight)
+            #Note: magic number 3 
+            denominator += (visWeight + starWeight + numHitsWeight + recentHitsWeight)**3
+    
     for j in range(board.rows):
         for k in range(board.cols):
             cell = board.board[j][k]
@@ -127,7 +131,7 @@ def distributeFundingCell(board):
             numHitsWeight = chooseCellToFund["numHits"] * (cell.numHits)
             recentHitsWeight = chooseCellToFund["numSciHits"] * (cell.numSciHits)
 
-            numerator = np.exp(visWeight + starWeight + numHitsWeight + recentHitsWeight)
+            numerator = (visWeight + starWeight + numHitsWeight + recentHitsWeight)**3
             probabilities[j][k] = numerator / denominator
 
             #fund cell and then scientist based on probabilities
@@ -147,8 +151,9 @@ def batchRun(board, numScientists, numRuns):
     for j in range(numRuns):
         # keep track of which cells the scientists are hitting to check overlap
         if j % funding["replenishTime"] == 0:
-            print("cellsHit: ", board.cellsHit)
-            print("funding: ", distributeFundingCell(board))
+            # print("cellsHit: ", board.cellsHit)
+            distributeFundingCell(board)
+            # print("funding: ", distributeFundingCell(board))
 
         board.cellsHit = {}
         for idx in range(len(dept)):
@@ -161,13 +166,13 @@ def batchRun(board, numScientists, numRuns):
                 board.cellsHit.update({location : [scientist]})
             if (scientist.career == 0) or (scientist.funding <= funding["minimum"]):
                 # when one scientist ends their career, another is introduced
-                print("died!")
                 dept.remove(scientist)
                 dept.append(Scientist())
         # print statistics at the end of the run
-        print()
-        print("Board with payoff values: ", oneRun(board, board.cellsHit, j+1))
-        print()
+        # print()
+        oneRun(board, board.cellsHit, j+1)
+        # print("Board with payoff values: ", oneRun(board, board.cellsHit, j+1))
+        # print()
         # print("Department: ", dept)
     currTotal = sum(board.flatten(board.getPayoffs()))
     print()
@@ -182,4 +187,4 @@ def batchRun(board, numScientists, numRuns):
     return
 
 board = Board(5, 5, 0)
-batchRun(board, numScientists=10, numRuns=20)
+batchRun(board, numScientists=20, numRuns=20)

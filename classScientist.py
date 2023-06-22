@@ -13,7 +13,7 @@ class Scientist():
 
     def __repr__(self):
         """String representation of Scientist"""
-        return str([self.impact, self.career, self.citcount])
+        return str([self.impact, self.career, self.citcount, self.funding])
 
     def getStarFactor(self):
         """calculates starFactor based on scientist's parameters"""
@@ -60,15 +60,15 @@ class Scientist():
         for x in range(board.rows):
             for y in range(board.cols):
                 cell = board.board[x][y]
-                denominator += np.exp((c * cell.numSciHits) +
-                    (i * board.getVisPayoff(cell.location)) + (f * cell.funds) +
-                    (e * 1/(1+cell.numHits)))
+                denominator += ((c * cell.numSciHits) + \
+                    (i * board.getVisPayoff(cell.location)) + (f * cell.funds) + \
+                    (e * 1/(1+cell.numHits)))**3
         for j in range(board.rows):
             for k in range(board.cols):
                 cell = board.board[j][k]
                 
-                numerator = np.exp((c * cell.numSciHits) + (i * board.getVisPayoff(cell.location)) +
-                    (e * 1/(1 + cell.numHits)) + (f * cell.funds))
+                numerator = ((c * cell.numSciHits) + (i * board.getVisPayoff(cell.location)) + \
+                    (e * 1/(1 + cell.numHits)) + (f * cell.funds))**3
                 
                 probabilities[j][k] = numerator / denominator
 

@@ -45,7 +45,6 @@ class Board():
         '''
         return (self.originalPays[location[1]][location[0]] - self.board[location[0]][location[1]].payoff)
 
-
     def flatten(self, matrix):
         """turns a 2D matrix into a 1D list"""
         return [matrix[i][j] for j in range(len(matrix[0])) for i in range(len(matrix))]
@@ -103,9 +102,9 @@ class Board():
                         plt.plot(i+randX-0.5, j+randY-0.5,
                             marker="o", markersize=dotSize, markeredgecolor="blue",
                             markerfacecolor="blue")
-                # annotating cells (phase, numHits)
-                # (ex: B5 means breakthrough phase, hit 5 times)
-                # add this for debugging payoffs: {f'{cell.payoff:.1f}'}
+                # uncomment and change the following code to display cell values on image
+                # plt.annotate(f"{self.getVisPayoff(cell.location):.2f}", xy = (i, j), xytext=(i-0.15, j+0.075),
+                #     fontsize=13, fontweight='bold')
                 gridlines = patches.Rectangle((i-0.5,j-0.5),
                                 1, 1,
                                 fill=False,
