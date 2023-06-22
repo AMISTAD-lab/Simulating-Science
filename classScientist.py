@@ -43,6 +43,15 @@ class Scientist():
         else:
             i = weights["impact"]
 
+        fundToCareer = (self.funding-(31 - self.career))
+        # if they have a low fundToCareer difference, then they value funding more
+        if fundToCareer <= -1:
+            f = weights["funding"] * abs(fundToCareer)
+        elif fundToCareer >= 1:
+            f = weights["funding"] * (1/fundToCareer)
+        else:
+            f = weights["funding"]
+
         e = weights["exploration"]
 
         # Calculate the probabilities for each cell
@@ -50,18 +59,16 @@ class Scientist():
         denominator = 0
         for x in range(board.rows):
             for y in range(board.cols):
-                # i should be associated with board payoff value
-                # e should be associated with numHits on the cell
-                # c should be associated with num scientists on the cell
-                # scientists see how much payoff has been extracted (visiblePayoff)
-                visiblePayoff = (board.originalPays[y][x] - board.board[x][y].payoff)
-                denominator += np.exp((c * board.board[x][y].numSciHits) + (i * visiblePayoff) + (e * 1/(1+board.board[x][y].numHits)))
+                cell = board.board[x][y]
+                denominator += np.exp((c * cell.numSciHits) +
+                    (i * board.getVisPayoff(cell.location)) + (f * cell.funds) +
+                    (e * 1/(1+cell.numHits)))
         for j in range(board.rows):
             for k in range(board.cols):
-                X1 = board.board[j][k]
-                visiblePayoff = (board.originalPays[k][j] - board.board[j][k].payoff)
+                cell = board.board[j][k]
                 
-                numerator = np.exp((c * X1.numSciHits) + (i * visiblePayoff) + (e * 1/(1 + X1.numHits)))
+                numerator = np.exp((c * cell.numSciHits) + (i * board.getVisPayoff(cell.location)) +
+                    (e * 1/(1 + cell.numHits)) + (f * cell.funds))
                 
                 probabilities[j][k] = numerator / denominator
 

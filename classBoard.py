@@ -25,6 +25,8 @@ class Board():
         self.board = [[Cell(np.random.choice(self.randomRange), (i, j)) for j in range(self.cols)] for i in range(self.rows)]
         self.originalPays = self.getPayoffs()
         self.totalPayoff = sum(self.flatten(self.originalPays))
+        #dictionary of cell location with scientists currently querying it
+        self.cellsHit = {}
 
     def __repr__(self):
         """string representation of Board"""
@@ -35,6 +37,14 @@ class Board():
         makes it easier to get a heatmap from a 2D matrix of data"""
         # note that the x and y coordinates were flipped to make the heatmap
         return [[self.board[i][j].payoff for i in range(self.cols)] for j in range(self.rows)]
+
+    def getVisPayoff(self, location):
+        '''
+        returns the payoff that has been extracted from given cell location;
+        this is what is visible to the scientists
+        '''
+        return (self.originalPays[location[1]][location[0]] - self.board[location[0]][location[1]].payoff)
+
 
     def flatten(self, matrix):
         """turns a 2D matrix into a 1D list"""

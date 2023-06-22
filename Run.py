@@ -7,14 +7,22 @@ from classScientist import *
 weights = {
     "citation" : 0, 
     "impact" : 0.1,
-    "exploration" : 1
+    "exploration" : 1,
+    "funding" : 0
 }
 
 funding = {
-    "total" : 50,
+    "total" : 100,
     "decrease" : 1,
     "replenishTime" : 5,
     "minimum" : 10
+}
+
+chooseCellToFund = {
+    "visPayoff" : 0,
+    "starFactor" : 0,
+    "numHits" : 0,
+    "numSciHits" : 0
 }
 
 def oneRun(board, cellsHit, numRun):
@@ -26,16 +34,14 @@ def oneRun(board, cellsHit, numRun):
             for scientist in sciOrder:
                 scientist.sciQuery(key, board)
                 scientist.cite(val)
-                # print("scientist: ", scientist)
         else:
             val[0].sciQuery(key, board)
-            # print("scientist: ", val[0])
     board.drawBoard(cellsHit, numRun)
     return board
 
-def distributeFunding(dept):
+def distributeFundingSci(dept, cellFunding):
     """
-    distribute the funding allotted for each board
+    distribute the funding allotted for each cell to the scientists in the cell
     """
     denominator = 0
     probabilities = np.zeros_like(dept)
@@ -48,7 +54,6 @@ def distributeFunding(dept):
             star = star
         else:
             star = 1
-
         denominator += np.exp(star)
 
     for i in range(len(dept)):
@@ -59,15 +64,77 @@ def distributeFunding(dept):
             star = star
         else:
             star = 1
-
         numerator = np.exp(star)
+        
         probabilities[i] = numerator / denominator
         # distribute funding based on starFactor for each scientist compared to whole department
-        dept[i].funding += probabilities[i] * funding["total"]
+        dept[i].funding += probabilities[i] * cellFunding
+        # to debug code, you might want to run the following line to distribute funding evenly
         # dept[i].funding += funding["total"]/(len(dept))
 
     return [sci.funding for sci in dept]
     # go through scientists, add to their funding proportion of total
+
+def distributeFundingCell(board):
+    """distributes funding to each cell based on historical numHits"""
+    # Calculate the probabilities for each cell
+    probabilities = np.zeros_like(board.board)
+    denominator = 0
+    for x in range(board.rows):
+        for y in range(board.cols):
+            cell = board.board[x][y]
+            #find the average of scientists' starFactors in this cell
+            starSum = 0
+            avgStarSum = 0
+            if cell.location in board.cellsHit.keys():
+                for sci in board.cellsHit[cell.location]:
+                    starSum += sci.getStarFactor()
+                avgStarSum = starSum/cell.numSciHits
+
+            # account for the fact that starFactor can be negative
+            if avgStarSum <= -1:
+                starWeight = chooseCellToFund["starFactor"] * 1/abs(avgStarSum)
+            elif avgStarSum >= 1:
+                starWeight = chooseCellToFund["starFactor"] * (avgStarSum)
+            else:
+                starWeight = chooseCellToFund["starFactor"]
+            #calculates the rest of the weights
+            visWeight = chooseCellToFund["visPayoff"] * (board.getVisPayoff(cell.location))
+            numHitsWeight = chooseCellToFund["numHits"] * (cell.numHits)
+            recentHitsWeight = chooseCellToFund["numSciHits"] * (cell.numSciHits)
+
+            denominator += np.exp(visWeight + starWeight + numHitsWeight + recentHitsWeight)
+    for j in range(board.rows):
+        for k in range(board.cols):
+            cell = board.board[j][k]
+            #find the average of scientists' starFactors in this cell
+            starSum = 0
+            avgStarSum = 0
+            if cell.location in board.cellsHit.keys():
+                for sci in board.cellsHit[cell.location]:
+                    starSum += sci.getStarFactor()
+                avgStarSum = starSum/cell.numSciHits
+
+            # account for the fact that starFactor can be negative
+            if avgStarSum <= -1:
+                starWeight = chooseCellToFund["starFactor"] * 1/abs(avgStarSum)
+            elif avgStarSum >= 1:
+                starWeight = chooseCellToFund["starFactor"] * (avgStarSum)
+            else:
+                starWeight = chooseCellToFund["starFactor"]
+
+            visWeight = chooseCellToFund["visPayoff"] * (board.getVisPayoff(cell.location))
+            numHitsWeight = chooseCellToFund["numHits"] * (cell.numHits)
+            recentHitsWeight = chooseCellToFund["numSciHits"] * (cell.numSciHits)
+
+            numerator = np.exp(visWeight + starWeight + numHitsWeight + recentHitsWeight)
+            probabilities[j][k] = numerator / denominator
+
+            #fund cell and then scientist based on probabilities
+            cell.funds = probabilities[j][k] * funding["total"]
+            if cell.location in board.cellsHit.keys():
+                distributeFundingSci(board.cellsHit[cell.location], cell.funds)
+    return probabilities
 
 def batchRun(board, numScientists, numRuns):
     """
@@ -80,24 +147,26 @@ def batchRun(board, numScientists, numRuns):
     for j in range(numRuns):
         # keep track of which cells the scientists are hitting to check overlap
         if j % funding["replenishTime"] == 0:
-            print("funding: ", distributeFunding(dept))
+            print("cellsHit: ", board.cellsHit)
+            print("funding: ", distributeFundingCell(board))
 
-        cellsHit = {}
+        board.cellsHit = {}
         for idx in range(len(dept)):
             scientist = dept[idx]
             scientist.funding -= funding["decrease"]
             location = scientist.chooseCell(board, weights)
-            if location in cellsHit.keys():
-                cellsHit[location].append(scientist)
+            if location in board.cellsHit.keys():
+                board.cellsHit[location].append(scientist)
             else:
-                cellsHit.update({location : [scientist]})
+                board.cellsHit.update({location : [scientist]})
             if (scientist.career == 0) or (scientist.funding <= funding["minimum"]):
                 # when one scientist ends their career, another is introduced
+                print("died!")
                 dept.remove(scientist)
                 dept.append(Scientist())
         # print statistics at the end of the run
         print()
-        print("Board with payoff values: ", oneRun(board, cellsHit, j+1))
+        print("Board with payoff values: ", oneRun(board, board.cellsHit, j+1))
         print()
         # print("Department: ", dept)
     currTotal = sum(board.flatten(board.getPayoffs()))

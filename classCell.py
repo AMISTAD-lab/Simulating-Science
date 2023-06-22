@@ -9,6 +9,7 @@ class Cell():
         self.lowerx, self.upperx, self.yList = self.logiFunc(15, 10)
         self.stepSize, self.slopeVals = self.setStepSize(10, 0.5)
         self.numSciHits = 0
+        self.funds = 0
 
     def __repr__(self):
         "string representation of Cell"
