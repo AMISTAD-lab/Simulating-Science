@@ -1,29 +1,22 @@
-from PIL import Image
 import numpy as np
+import json
+from PIL import Image
 from classCell import *
 from classBoard import *
 from classScientist import *
 
-weights = {
-    "citation" : 0.5, 
-    "impact" : 0.5,
-    "exploration" : 0.5,
-    "funding" : 0.5
-}
+# load in input parameters from json config file
+with open("config.json", "r") as params:
+    data = json.load(params)
 
-funding = {
-    "total" : 100,
-    "decrease" : 1,
-    "replenishTime" : 5,
-    "minimum" : 10
-}
-
-chooseCellToFund = {
-    "visPayoff" : 0.5,
-    "starFactor" : 0.5,
-    "numHits" : 0.5,
-    "numSciHits" : 0.5
-}
+weights = data["cellChoiceWeights"]
+funding = data["fundingParams"]
+chooseCellToFund = data["fundDistributionFactors"]
+# semi-firm parameters that you could easily change but probabily won't need to
+exp = data["expForProbabilities"]
+N = data["payoffExtractionParams"]["N"]
+D = data["payoffExtractionParams"]["D"]
+p = data["payoffExtractionParams"]["p"]
 
 def oneRun(board, cellsHit, numRun):
     """runs query simulation for one year"""
@@ -50,13 +43,13 @@ def batchRun(board, numScientists, numRuns):
     for j in range(numRuns):
         # keep track of which cells the scientists are hitting to check overlap
         if j % funding["replenishTime"] == 0:
-            board.distributeFundingCell(chooseCellToFund, funding)
+            board.distributeFundingCell(chooseCellToFund, funding, exp)
 
         board.cellsHit = {}
         for idx in range(len(dept)):
             scientist = dept[idx]
             scientist.funding -= funding["decrease"]
-            location = scientist.chooseCell(board, weights)
+            location = scientist.chooseCell(board, weights, exp)
             if location in board.cellsHit.keys():
                 board.cellsHit[location].append(scientist)
             else:
@@ -81,5 +74,5 @@ def batchRun(board, numScientists, numRuns):
             save_all=True, duration=500, loop=1)
     return
 
-board = Board(5, 5, 0)
+board = Board(5, 5, 0, N, D, p)
 batchRun(board, numScientists=20, numRuns=20)

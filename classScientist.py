@@ -22,7 +22,7 @@ class Scientist():
         overall = num/denom
         return overall
 
-    def probCell(self, board, weights):
+    def probCell(self, board, weights, exp):
         """"generates a probability distribution over the cells"""
         citToCareer = (self.citcount-(31 - self.career))
         # if they have a low citToCareer difference, then they value citations more
@@ -62,21 +62,21 @@ class Scientist():
                 cell = board.board[x][y]
                 denominator += ((c * cell.numSciHits) + \
                     (i * board.getVisPayoff(cell.location)) + (f * cell.funds) + \
-                    (e * 1/(1+cell.numHits)))**3
+                    (e * 1/(1+cell.numHits))) ** exp
         for j in range(board.rows):
             for k in range(board.cols):
                 cell = board.board[j][k]
                 
                 numerator = ((c * cell.numSciHits) + (i * board.getVisPayoff(cell.location)) + \
-                    (e * 1/(1 + cell.numHits)) + (f * cell.funds))**3
+                    (e * 1/(1 + cell.numHits)) + (f * cell.funds)) ** exp
                 
                 probabilities[j][k] = numerator / denominator
 
         return probabilities
 
-    def chooseCell(self, board, weights):
+    def chooseCell(self, board, weights, exp):
         """chooses cell to query"""
-        probs = self.probCell(board, weights)
+        probs = self.probCell(board, weights, exp)
     
         flatBoard = [board.board[i][j].location for j in range(board.cols) for i in range(board.rows)]
         flatProbs = board.flatten(probs)

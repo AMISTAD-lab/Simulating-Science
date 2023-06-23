@@ -4,7 +4,7 @@ import numpy as np
 from classCell import *
 
 class Board():
-    def __init__(self, rows, cols, probzero):
+    def __init__(self, rows, cols, probzero, N, D, p):
         self.rows = rows
         self.cols = cols
         self.probzero = probzero
@@ -22,7 +22,9 @@ class Board():
         np.random.shuffle(self.randomRange)
 
         # board has random payoff values in each cell
-        self.board = [[Cell(np.random.choice(self.randomRange), (i, j)) for j in range(self.cols)] for i in range(self.rows)]
+        # we also pass in parameters N, D, p to split the extraction of the payoff
+        # into randomized microsteps with probability p
+        self.board = [[Cell(np.random.choice(self.randomRange), (i, j), N, D, p) for j in range(self.cols)] for i in range(self.rows)]
         self.originalPays = self.getPayoffs()
         self.totalPayoff = sum(self.flatten(self.originalPays))
         #dictionary of cell location with scientists currently querying it
@@ -82,7 +84,7 @@ class Board():
 
         return [sci.funding for sci in dept]
 
-    def distributeFundingCell(self, chooseCellToFund, funding):
+    def distributeFundingCell(self, chooseCellToFund, funding, exp):
         """distributes funding to each cell based on input weights"""
         # Calculate the probabilities for each cell
         probabilities = np.zeros_like(self.board)
@@ -110,8 +112,7 @@ class Board():
                 numHitsWeight = chooseCellToFund["numHits"] * (cell.numHits)
                 recentHitsWeight = chooseCellToFund["numSciHits"] * (cell.numSciHits)
 
-                #Note: magic number 3 
-                denominator += (visWeight + starWeight + numHitsWeight + recentHitsWeight)**3
+                denominator += (visWeight + starWeight + numHitsWeight + recentHitsWeight) ** exp
         
         for j in range(self.rows):
             for k in range(self.cols):
@@ -136,7 +137,7 @@ class Board():
                 numHitsWeight = chooseCellToFund["numHits"] * (cell.numHits)
                 recentHitsWeight = chooseCellToFund["numSciHits"] * (cell.numSciHits)
 
-                numerator = (visWeight + starWeight + numHitsWeight + recentHitsWeight)**3
+                numerator = (visWeight + starWeight + numHitsWeight + recentHitsWeight) ** exp
                 probabilities[j][k] = numerator / denominator
 
                 #fund cell and then scientist based on probabilities

@@ -2,12 +2,12 @@ import numpy as np
 import math
 
 class Cell():
-    def __init__(self, payoff, location):
+    def __init__(self, payoff, location, N, D, p):
         self.payoff = payoff
         self.location = location
         self.numHits = 0
-        self.lowerx, self.upperx, self.yList = self.logiFunc(15, 10)
-        self.stepSize, self.slopeVals = self.setStepSize(10, 0.5)
+        self.lowerx, self.upperx, self.yList = self.logiFunc(N, D)
+        self.stepSize, self.slopeVals = self.setStepSize(D, p)
         self.numSciHits = 0
         self.funds = 0
 
