@@ -24,9 +24,9 @@ class Scientist():
 
     def probCell(self, board, weights, exp):
         """"generates a probability distribution over the cells"""
-        citToCareer = (self.citcount-(31 - self.career))
         # if they have a low citToCareer difference, then they value citations more
         # also, ensure numbers are in reasonable range
+        citToCareer = (self.citcount-(31 - self.career))
         if citToCareer <= -1:
             c = weights["citation"] * abs(citToCareer)
         elif citToCareer >= 1:
@@ -34,8 +34,8 @@ class Scientist():
         else:
             c = weights["citation"]
 
-        impactToCareer = (self.impact-(31 - self.career))
         # if they have a low impactToCareer difference, then they value impact more
+        impactToCareer = (self.impact-(31 - self.career))
         if impactToCareer <= -1:
             i = weights["impact"] * abs(impactToCareer)
         elif impactToCareer >= 1:
@@ -43,8 +43,8 @@ class Scientist():
         else:
             i = weights["impact"]
 
-        fundToCareer = (self.funding-(31 - self.career))
         # if they have a low fundToCareer difference, then they value funding more
+        fundToCareer = (self.funding-(31 - self.career))
         if fundToCareer <= -1:
             f = weights["funding"] * abs(fundToCareer)
         elif fundToCareer >= 1:
@@ -71,18 +71,14 @@ class Scientist():
                     (e * 1/(1 + cell.numHits)) + (f * cell.funds)) ** exp
                 
                 probabilities[j][k] = numerator / denominator
-
         return probabilities
 
     def chooseCell(self, board, weights, exp):
         """chooses cell to query"""
         probs = self.probCell(board, weights, exp)
-    
         flatBoard = [board.board[i][j].location for j in range(board.cols) for i in range(board.rows)]
         flatProbs = board.flatten(probs)
-
         choice = random.choices(flatBoard, weights=flatProbs, k=1)
-        
         return choice[0]
 
     def sciQuery(self, location, board):
@@ -120,16 +116,13 @@ class Scientist():
 
             numerator = np.exp(star)
             probabilities[i] = numerator / denominator
-
         return probabilities
 
     def cite(self, val):
         """decides which other scientists in the cell get cited"""
         probs = self.citeProbs(val)
-
         # randomly choose how many other scientists to cite, not including themselves
         numCites = np.random.randint(0, len(val) + 1)
-        
         choice = random.choices(val, weights=probs, k=numCites)
         for elem in choice:
             if elem != self:

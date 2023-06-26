@@ -19,6 +19,7 @@ class Cell():
         """
         model payoff extraction for each cell as a randomized logistic function
         """
+        # boolean for whether we have found the lowerx and upperx
         lowSuccess = False
         highSuccess  = False
 
@@ -33,6 +34,7 @@ class Cell():
             highSuccess = False
             for x in np.arange(0, 50, 0.01):
                 y = float(1/(1 + math.pow(math.e, -steepness*(x-center))))
+                # creates a boundary 0.1 above 0 and below 1 for y-val to set as upperx and lowerx
                 if ((y - .01) <= 0.1) and math.floor(x) > 0:
                     lowerx = math.floor(x)
                     lowSuccess = True
@@ -45,8 +47,7 @@ class Cell():
             self.incHit = float(1/(1 + math.pow(math.e, -steepness*(xmax-center))))
             self.breakHit = float(1/(1 + math.pow(math.e, -steepness*(lowerx-center))))
 
-            #Goal: to get from x=0 to x=xmax in ksteps
-            # - Chop interval into N pieces
+            # Creates a list of coordinates by D microsteps up to xmax
             yList = []
             interval = xmax/N
             for x in np.arange(0, xmax, interval/D):
@@ -59,10 +60,10 @@ class Cell():
         split the steps along the logistic function into randomized microsteps
         """
         slopeVals = {}
-        # - for Scientist at time i, flip coin (with probability p) D times (number of microsteps)
+        # randomly generates the microstep interval
         stepSize = np.random.binomial(D*2, p, size=None)
 
-        #putting the slopes in a dictionary
+        # calculates slopes according to stepSize
         prevY = 0
         i = 0
         while i <= self.upperx: 
@@ -79,9 +80,9 @@ class Cell():
         """returns payoff for each scientist based on conditions of a cell"""
         original = self.payoff
         sciPayoff = 0.0
-        self.setStepSize(10, 0.5)
-
+        self.setStepSize(self.D, self.p)
         originalPay = board.originalPays[self.location[1]][self.location[0]]
+        # if we enter incremental phase, taken payoff becomes random
         if self.payoff/originalPay >= self.incHit-1:
             frac = np.random.random()
         else:

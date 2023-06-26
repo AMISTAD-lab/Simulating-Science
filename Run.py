@@ -21,6 +21,7 @@ p = data["payoffExtractionParams"]["p"]
 def oneRun(board, cellsHit, numRun):
     """runs query simulation for one year"""
     for key, val in cellsHit.items():
+        #more than one scientist
         if len(val) > 1:
             # randomly choose order in which scientists hit that same cell
             sciOrder = np.random.permutation(val)
@@ -31,7 +32,6 @@ def oneRun(board, cellsHit, numRun):
             val[0].sciQuery(key, board)
     board.drawBoard(cellsHit, numRun)
     return board
-
 
 def batchRun(board, numScientists, numRuns):
     """
@@ -45,17 +45,19 @@ def batchRun(board, numScientists, numRuns):
         if j % funding["replenishTime"] == 0:
             board.distributeFundingCell(chooseCellToFund, funding, exp)
 
+        # gives which scientists are at that location
         board.cellsHit = {}
         for idx in range(len(dept)):
             scientist = dept[idx]
+            # update funding decrease for each scientist each year
             scientist.funding -= funding["decrease"]
             location = scientist.chooseCell(board, weights, exp)
             if location in board.cellsHit.keys():
                 board.cellsHit[location].append(scientist)
             else:
                 board.cellsHit.update({location : [scientist]})
+            # when one scientist ends their career, another is introduced
             if (scientist.career == 0) or (scientist.funding <= funding["minimum"]):
-                # when one scientist ends their career, another is introduced
                 dept.remove(scientist)
                 dept.append(Scientist())
 
