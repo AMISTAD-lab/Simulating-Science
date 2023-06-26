@@ -51,7 +51,7 @@ class Board():
         """turns a 2D matrix into a 1D list"""
         return [matrix[i][j] for j in range(len(matrix[0])) for i in range(len(matrix))]
 
-    def distributeFundingSci(self, dept, cellFunding):
+    def distributeFundingSci(self, cell, dept, cellFunding):
         """
         distribute the funding allotted for each cell to the scientists in the cell
         """
@@ -87,7 +87,7 @@ class Board():
     def distributeFundingCell(self, chooseCellToFund, funding, exp):
         """distributes funding to each cell based on input weights"""
         # Calculate the probabilities for each cell
-        probabilities = np.zeros_like(self.board)
+        probabilities = np.random.rand(self.rows, self.cols)
         denominator = 0
         for x in range(self.rows):
             for y in range(self.cols):
@@ -114,6 +114,19 @@ class Board():
 
                 denominator += (visWeight + starWeight + numHitsWeight + recentHitsWeight) ** exp
         
+        # generate random probabilities if denominator is 0
+        if denominator == 0:
+            sumProbs = sum(self.flatten(probabilities))
+            probabilities = [[probabilities[i][j] / sumProbs for j in range(len(probabilities[0]))] for i in range(len(probabilities))]
+            for i in range(len(probabilities)):
+                for j in range(len(probabilities[0])):
+                    #fund cell and then scientist based on probabilities
+                    cell = self.board[i][j]
+                    cell.funds = probabilities[i][j] * funding["total"]
+                    if cell.location in self.cellsHit.keys():
+                        self.distributeFundingSci(cell, self.cellsHit[cell.location], cell.funds)
+            return probabilities
+
         for j in range(self.rows):
             for k in range(self.cols):
                 cell = self.board[j][k]
@@ -143,7 +156,7 @@ class Board():
                 #fund cell and then scientist based on probabilities
                 cell.funds = probabilities[j][k] * funding["total"]
                 if cell.location in self.cellsHit.keys():
-                    self.distributeFundingSci(self.cellsHit[cell.location], cell.funds)
+                    self.distributeFundingSci(cell, self.cellsHit[cell.location], cell.funds)
         return probabilities
 
     def drawBoard(self, cellsHit, numRun):
@@ -199,8 +212,11 @@ class Board():
                         plt.plot(i+randX-0.5, j+randY-0.5,
                             marker="o", markersize=dotSize, markeredgecolor="blue",
                             markerfacecolor="blue")
+                        # uncomment the following code to display starFactor along with each scientist's dot
+                        plt.annotate(f"{starFactor:.1f}", xy = (i+randX-0.5, j+randY-0.5), xytext=(i+randX-0.5, j+randY-0.5),
+                            fontsize=5, fontweight='bold')
                 # uncomment and change the following code to display cell values on image
-                # plt.annotate(f"{self.getVisPayoff(cell.location):.2f}", xy = (i, j), xytext=(i-0.15, j+0.075),
+                # plt.annotate(f"{cell.funds:.2f}", xy = (i, j), xytext=(i-0.15, j+0.075),
                 #     fontsize=13, fontweight='bold')
                 gridlines = patches.Rectangle((i-0.5,j-0.5),
                                 1, 1,

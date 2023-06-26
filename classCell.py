@@ -5,6 +5,9 @@ class Cell():
     def __init__(self, payoff, location, N, D, p):
         self.payoff = payoff
         self.location = location
+        self.N = N
+        self.D = D
+        self.p = p
         self.numHits = 0
         self.lowerx, self.upperx, self.yList = self.logiFunc(N, D)
         self.stepSize, self.slopeVals = self.setStepSize(D, p)

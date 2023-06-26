@@ -42,8 +42,8 @@ def batchRun(board, numScientists, numRuns):
     dept = [Scientist() for i in range(numScientists)]
     for j in range(numRuns):
         # keep track of which cells the scientists are hitting to check overlap
-        if j % funding["replenishTime"] == 0:
-            board.distributeFundingCell(chooseCellToFund, funding, exp)
+        # funding for the first year is determined randomly
+        board.distributeFundingCell(chooseCellToFund, funding, exp)
 
         # gives which scientists are at that location
         board.cellsHit = {}

@@ -3,10 +3,10 @@
     {"citation" : 0.5, "impact" : 0.5, "exploration" : 0.5, "funding" : 0.5},
 
     "fundingParams" : 
-    {"total" : 100, "decrease" : 1, "replenishTime" : 5, "minimum" : 10},
+    {"total" : 100, "decrease" : 1, "minimum" : 10},
 
     "fundDistributionFactors" : 
-    {"visPayoff" : 0.5, "starFactor" : 0.5, "numHits" : 0.5,"numSciHits" : 0.5},
+    {"visPayoff" : 0, "starFactor" : 0, "numHits" : 1, "numSciHits" : 0},
 
     "expForProbabilities" :
     3,

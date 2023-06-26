@@ -55,7 +55,7 @@ class Scientist():
         e = weights["exploration"]
 
         # Calculate the probabilities for each cell
-        probabilities = np.zeros_like(board.board)
+        probabilities = np.random.rand(board.rows, board.cols)
         denominator = 0
         for x in range(board.rows):
             for y in range(board.cols):
@@ -63,6 +63,12 @@ class Scientist():
                 denominator += ((c * cell.numSciHits) + \
                     (i * board.getVisPayoff(cell.location)) + (f * cell.funds) + \
                     (e * 1/(1+cell.numHits))) ** exp
+        
+        # generate random probabilities if denominator is 0
+        if denominator == 0:
+            sumProbs = sum(board.flatten(probabilities))
+            return [[probabilities[i][j] / sumProbs for j in range(len(probabilities[0]))] for i in range(len(probabilities))]
+            
         for j in range(board.rows):
             for k in range(board.cols):
                 cell = board.board[j][k]
