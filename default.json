@@ -9,7 +9,7 @@
     {"visPayoff" : 0, "starFactor" : 0, "numHits" : 0, "numSciHits" : 0},
 
     "expForProbabilities" :
-    3,
+    {"num" : 3},
 
     "payoffExtractionParams" : 
     {"N" : 15, "D" : 10, "p" : 0.5},

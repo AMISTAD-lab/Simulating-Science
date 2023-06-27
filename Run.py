@@ -5,22 +5,7 @@ from classCell import *
 from classBoard import *
 from classScientist import *
 
-# input the name of the file with the parameters (eg config.json or configFiles/citation.json)
-input = input()
-with open(input, "r") as params:
-    data = json.load(params)
-
-weights = data["cellChoiceWeights"]
-funding = data["fundingParams"]
-chooseCellToFund = data["fundDistributionFactors"]
-# semi-firm parameters that you could easily change but probabily won't need to
-exp = data["expForProbabilities"]
-N = data["payoffExtractionParams"]["N"]
-D = data["payoffExtractionParams"]["D"]
-p = data["payoffExtractionParams"]["p"]
-starFactorWeights = data["starFactorWeights"]
-
-def oneRun(board, cellsHit, numRun):
+def oneRun(board, cellsHit, numRun, starFactorWeights):
     """runs query simulation for one year"""
     for key, val in cellsHit.items():
         #more than one scientist
@@ -35,12 +20,19 @@ def oneRun(board, cellsHit, numRun):
     board.drawBoard(cellsHit, numRun, starFactorWeights)
     return board
 
-def batchRun(board, numScientists, numRuns):
+def batchRun(board, numScientists, numRuns, data):
     """
     Runs the simulation for each of numRuns years.
     During each run, each scientist in the department queries the board.
     At the end, an animation of the plots of each run is generated.
     """
+    weights = data["cellChoiceWeights"]
+    funding = data["fundingParams"]
+    chooseCellToFund = data["fundDistributionFactors"]
+    # semi-firm parameters that you could easily change but probabily won't need to
+    exp = data["expForProbabilities"]["num"]
+    starFactorWeights = data["starFactorWeights"]
+
     dept = [Scientist() for i in range(numScientists)]
     for j in range(numRuns):
         # keep track of which cells the scientists are hitting to check overlap
@@ -62,9 +54,9 @@ def batchRun(board, numScientists, numRuns):
             if (scientist.career == 0) or (scientist.funding <= funding["minimum"]):
                 dept.remove(scientist)
                 dept.append(Scientist())
-
-        print("Board with payoff values: ", oneRun(board, board.cellsHit, j+1))
-        print()
+        oneRun(board, board.cellsHit, j+1, starFactorWeights)
+        # print("Board with payoff values: ", oneRun(board, board.cellsHit, j+1, starFactorWeights))
+        # print()
 
     currTotal = sum(board.flatten(board.getPayoffs()))
     print()
@@ -78,5 +70,3 @@ def batchRun(board, numScientists, numRuns):
             save_all=True, duration=500, loop=1)
     return
 
-board = Board(5, 5, 0, N, D, p)
-batchRun(board, numScientists=20, numRuns=20)
