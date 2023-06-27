@@ -13,6 +13,7 @@ class Cell():
         self.stepSize, self.slopeVals = self.setStepSize(D, p)
         self.numSciHits = 0
         self.funds = 0
+        self.totalFunds = 0
 
     def __repr__(self):
         """string representation of Cell"""

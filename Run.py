@@ -26,14 +26,15 @@ def batchRun(board, numScientists, numRuns, data):
     During each run, each scientist in the department queries the board.
     At the end, an animation of the plots of each run is generated.
     """
-    weights = data["cellChoiceWeights"]
-    funding = data["fundingParams"]
-    chooseCellToFund = data["fundDistributionFactors"]
+    weights = data["cell"]
+    funding = data["fund"]
+    chooseCellToFund = data["fundFactors"]
     # semi-firm parameters that you could easily change but probabily won't need to
-    exp = data["expForProbabilities"]["num"]
-    starFactorWeights = data["starFactorWeights"]
+    exp = data["exp"]["num"]
+    starFactorWeights = data["star"]
 
     dept = [Scientist() for i in range(numScientists)]
+    attrition = 0
     for j in range(numRuns):
         # keep track of which cells the scientists are hitting to check overlap
         # funding for the first year is determined randomly
@@ -52,6 +53,11 @@ def batchRun(board, numScientists, numRuns, data):
                 board.cellsHit.update({location : [scientist]})
             # when one scientist ends their career, another is introduced
             if (scientist.career == 0) or (scientist.funding <= funding["minimum"]):
+                # attrition is the number of scientists who left science due to lack of funding
+                if (scientist.funding <= funding["minimum"]):
+                    attrition += 1
+                # record the data of scientists who left science
+                board.sStats.append([scientist.funding, scientist.getStarFactor(starFactorWeights), scientist.citcount])
                 dept.remove(scientist)
                 dept.append(Scientist())
         oneRun(board, board.cellsHit, j+1, starFactorWeights)
@@ -68,5 +74,19 @@ def batchRun(board, numScientists, numRuns, data):
     frame_one = frames[0]
     frame_one.save("animation.gif", format="GIF", append_images=frames,
             save_all=True, duration=500, loop=1)
-    return
+
+    # add the scientist stats from the ten scientists at the very end
+    for scientist in dept:
+        board.sStats.append([scientist.funding, scientist.getStarFactor(starFactorWeights), scientist.citcount])
+
+    # add percentage of board discovered and attrition stats
+    board.bStats = [(board.totalPayoff - currTotal)/board.totalPayoff*100, 
+                    attrition]
+
+    # get cell funds and payoff of the board at the end
+    for x in range(board.rows):
+            for y in range(board.cols):
+                cell = board.board[x][y]
+                board.cStats.append([cell.totalFunds, board.getVisPayoff(cell.location)])
+    return [board.bStats, board.cStats, board.sStats]
 

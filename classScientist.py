@@ -22,7 +22,7 @@ class Scientist():
         i = starFactorWeights["impact"]
         f = starFactorWeights["funding"]
         denom = (31 - self.career) 
-        overall = (c*self.citcount + i*self.impact + f*self.funding)/denom - 2*denom
+        overall = (c*self.citcount + i*self.impact + f*self.funding)/denom - 3
         return overall
 
     def probCell(self, board, weights, exp):

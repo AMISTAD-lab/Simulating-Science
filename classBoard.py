@@ -30,6 +30,10 @@ class Board():
         #dictionary of cell location with scientists currently querying it
         self.cellsHit = {}
 
+        self.bStats = []
+        self.cStats = []
+        self.sStats = []
+
     def __repr__(self):
         """string representation of Board"""
         return str(self.board)
@@ -105,8 +109,8 @@ class Board():
                     starWeight = chooseCellToFund["starFactor"]
                 #calculates the rest of the weights
                 visWeight = chooseCellToFund["visPayoff"] * (self.getVisPayoff(cell.location))
-                numHitsWeight = chooseCellToFund["numHits"] * (cell.numHits)
-                recentHitsWeight = chooseCellToFund["numSciHits"] * (cell.numSciHits)
+                numHitsWeight = chooseCellToFund["totalHits"] * (cell.numHits)
+                recentHitsWeight = chooseCellToFund["recentHits"] * (cell.numSciHits)
 
                 denominator += (visWeight + starWeight + numHitsWeight + recentHitsWeight) ** exp
         
@@ -119,6 +123,7 @@ class Board():
                     #fund cell and then scientist based on probabilities
                     cell = self.board[i][j]
                     cell.funds = probabilities[i][j] * funding["total"]
+                    cell.totalFunds += probabilities[i][j] * funding["total"]
                     if cell.location in self.cellsHit.keys():
                         self.distributeFundingSci(cell, self.cellsHit[cell.location], cell.funds, starFactorWeights)
             return probabilities
@@ -151,6 +156,7 @@ class Board():
 
                 #fund cell and then scientist based on probabilities
                 cell.funds = probabilities[j][k] * funding["total"]
+                cell.totalFunds += probabilities[j][k] * funding["total"]
                 if cell.location in self.cellsHit.keys():
                     self.distributeFundingSci(cell, self.cellsHit[cell.location], cell.funds, starFactorWeights)
         return probabilities

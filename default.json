@@ -1,19 +1,19 @@
 {
-    "cellChoiceWeights" :
+    "cell" :
     {"citation" : 0, "impact" : 0, "exploration" : 0, "funding" : 0},
 
-    "fundingParams" : 
+    "fund" : 
     {"total" : 100, "decrease" : 1, "minimum" : 10},
 
-    "fundDistributionFactors" : 
-    {"visPayoff" : 0, "starFactor" : 0, "numHits" : 0, "numSciHits" : 0},
+    "fundFactors" : 
+    {"visPayoff" : 0, "starFactor" : 0, "totalHits" : 0, "recentHits" : 0},
 
-    "expForProbabilities" :
+    "exp" :
     {"num" : 3},
 
-    "payoffExtractionParams" : 
+    "payoff" : 
     {"N" : 15, "D" : 10, "p" : 0.5},
 
-    "starFactorWeights" :
+    "star" :
     {"impact" : 1, "citation" : 1, "funding" : 1}
 }

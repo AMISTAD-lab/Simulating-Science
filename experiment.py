@@ -1,4 +1,5 @@
 import json
+import csv
 from Run import *
 
 inp = "default.json"
@@ -29,10 +30,40 @@ def experiment(numScientists, numRuns, numExperiments):
             return
         inputStr = input()
 
-    N = data["payoffExtractionParams"]["N"]
-    D = data["payoffExtractionParams"]["D"]
-    p = data["payoffExtractionParams"]["p"]
+    N = data["payoff"]["N"]
+    D = data["payoff"]["D"]
+    p = data["payoff"]["p"]
     board = Board(5, 5, 0, N, D, p)
+
+    bStats = []
+    cStats = []
+    sStats = []
     for x in range(numExperiments):
-        batchRun(board, numScientists, numRuns, data)
+        batchResult = batchRun(board, numScientists, numRuns, data)
+        bStats.append(batchResult[0])
+        cStats.append(batchResult[1])
+        sStats.append(batchResult[2])
+
+    # write stats to csv output file
+    # each experiment's stats appear in one row
+    boardStats = "boardStats.csv"
+    with open(boardStats, 'w', newline='') as file:
+        writer = csv.writer(file)
+        header = ['Percentage Payoff Discovered', 'Attrition']
+        writer.writerow(header)
+        writer.writerows(bStats)
+
+    cellStats = "cellStats.csv"
+    with open(cellStats, 'w', newline='') as file:
+        writer = csv.writer(file)
+        header = ['Funds', 'Payoff Extracted']
+        writer.writerow(header)
+        writer.writerows(cStats)
+    
+    sciStats = "sciStats.csv"
+    with open(sciStats, 'w', newline='') as file:
+        writer = csv.writer(file)
+        header = ['Total Funding Accumulated', 'starFactor', 'Citation Count']
+        writer.writerow(header)
+        writer.writerows(sStats)
     return
