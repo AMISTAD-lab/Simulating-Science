@@ -51,30 +51,26 @@ class Board():
         """turns a 2D matrix into a 1D list"""
         return [matrix[i][j] for j in range(len(matrix[0])) for i in range(len(matrix))]
 
-    def distributeFundingSci(self, cell, dept, cellFunding):
+    def distributeFundingSci(self, cell, dept, cellFunding, starFactorWeights):
         """
         distribute the funding allotted for each cell to the scientists in the cell
         """
         denominator = 0
         probabilities = np.zeros_like(dept)
         for sci in dept:
-            star = sci.getStarFactor()
+            star = sci.getStarFactor(starFactorWeights)
             # ensure numbers are in reasonable range
             if star <= -1:
                 star = 1/abs(star)
-            elif star >= 1:
-                star = star
-            else:
+            elif star < 1:
                 star = 1
             denominator += np.exp(star)
 
         for i in range(len(dept)):
-            star = dept[i].getStarFactor()
+            star = dept[i].getStarFactor(starFactorWeights)
             if star <= -1:
                 star = 1/abs(star)
-            elif star >= 1:
-                star = star
-            else:
+            elif star < 1:
                 star = 1
             numerator = np.exp(star)
             
@@ -84,7 +80,7 @@ class Board():
 
         return [sci.funding for sci in dept]
 
-    def distributeFundingCell(self, chooseCellToFund, funding, exp):
+    def distributeFundingCell(self, chooseCellToFund, funding, exp, starFactorWeights):
         """distributes funding to each cell based on input weights"""
         # Calculate the probabilities for each cell
         probabilities = np.random.rand(self.rows, self.cols)
@@ -97,7 +93,7 @@ class Board():
                 avgStarSum = 0
                 if cell.location in self.cellsHit.keys():
                     for sci in self.cellsHit[cell.location]:
-                        starSum += sci.getStarFactor()
+                        starSum += sci.getStarFactor(starFactorWeights)
                     avgStarSum = starSum/cell.numSciHits
 
                 # account for the fact that starFactor can be negative
@@ -124,7 +120,7 @@ class Board():
                     cell = self.board[i][j]
                     cell.funds = probabilities[i][j] * funding["total"]
                     if cell.location in self.cellsHit.keys():
-                        self.distributeFundingSci(cell, self.cellsHit[cell.location], cell.funds)
+                        self.distributeFundingSci(cell, self.cellsHit[cell.location], cell.funds, starFactorWeights)
             return probabilities
 
         for j in range(self.rows):
@@ -135,7 +131,7 @@ class Board():
                 avgStarSum = 0
                 if cell.location in self.cellsHit.keys():
                     for sci in self.cellsHit[cell.location]:
-                        starSum += sci.getStarFactor()
+                        starSum += sci.getStarFactor(starFactorWeights)
                     avgStarSum = starSum/cell.numSciHits
 
                 # account for the fact that starFactor can be negative
@@ -156,10 +152,10 @@ class Board():
                 #fund cell and then scientist based on probabilities
                 cell.funds = probabilities[j][k] * funding["total"]
                 if cell.location in self.cellsHit.keys():
-                    self.distributeFundingSci(cell, self.cellsHit[cell.location], cell.funds)
+                    self.distributeFundingSci(cell, self.cellsHit[cell.location], cell.funds, starFactorWeights)
         return probabilities
 
-    def drawBoard(self, cellsHit, numRun):
+    def drawBoard(self, cellsHit, numRun, starFactorWeights):
         """produces a plot of the board for a given run and saves the image"""
         data = self.getPayoffs()
         plot = plt.imshow(data, cmap="Greens", vmin=0, vmax=30)
@@ -194,7 +190,7 @@ class Board():
                     # plotting the "dot" scientists
                     for x in range(1, cell.numSciHits + 1):
                         scientist = cellsHit[cell.location][x-1]
-                        starFactor = scientist.getStarFactor()
+                        starFactor = scientist.getStarFactor(starFactorWeights)
                         if starFactor < 0:
                             if (7 - 7 * abs(starFactor)) < 3:
                                 dotSize = 3
@@ -213,8 +209,8 @@ class Board():
                             marker="o", markersize=dotSize, markeredgecolor="blue",
                             markerfacecolor="blue")
                         # uncomment the following code to display starFactor along with each scientist's dot
-                        plt.annotate(f"{starFactor:.1f}", xy = (i+randX-0.5, j+randY-0.5), xytext=(i+randX-0.5, j+randY-0.5),
-                            fontsize=5, fontweight='bold')
+                        # plt.annotate(f"{starFactor:.1f}", xy = (i+randX-0.5, j+randY-0.5), xytext=(i+randX-0.5, j+randY-0.5),
+                        #     fontsize=5, fontweight='bold')
                 # uncomment and change the following code to display cell values on image
                 # plt.annotate(f"{cell.funds:.2f}", xy = (i, j), xytext=(i-0.15, j+0.075),
                 #     fontsize=13, fontweight='bold')

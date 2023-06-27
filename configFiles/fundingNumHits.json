@@ -1,6 +1,6 @@
 {
     "cellChoiceWeights" :
-    {"citation" : 0.5, "impact" : 0.5, "exploration" : 0.5, "funding" : 0.5},
+    {"citation" : 0, "impact" : 0, "exploration" : 0, "funding" : 1},
 
     "fundingParams" : 
     {"total" : 100, "decrease" : 1, "minimum" : 10},
@@ -12,5 +12,8 @@
     3,
 
     "payoffExtractionParams" : 
-    {"N" : 15, "D" : 10, "p" : 0.5}
+    {"N" : 15, "D" : 10, "p" : 0.5},
+
+    "starFactorWeights" :
+    {"impact" : 1, "citation" : 1, "funding" : 1}
 }

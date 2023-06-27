@@ -5,8 +5,9 @@ from classCell import *
 from classBoard import *
 from classScientist import *
 
-# load in input parameters from json config file
-with open("config.json", "r") as params:
+# input the name of the file with the parameters (eg config.json or configFiles/citation.json)
+input = input()
+with open(input, "r") as params:
     data = json.load(params)
 
 weights = data["cellChoiceWeights"]
@@ -17,6 +18,7 @@ exp = data["expForProbabilities"]
 N = data["payoffExtractionParams"]["N"]
 D = data["payoffExtractionParams"]["D"]
 p = data["payoffExtractionParams"]["p"]
+starFactorWeights = data["starFactorWeights"]
 
 def oneRun(board, cellsHit, numRun):
     """runs query simulation for one year"""
@@ -27,10 +29,10 @@ def oneRun(board, cellsHit, numRun):
             sciOrder = np.random.permutation(val)
             for scientist in sciOrder:
                 scientist.sciQuery(key, board)
-                scientist.cite(val)
+                scientist.cite(val, starFactorWeights)
         else:
             val[0].sciQuery(key, board)
-    board.drawBoard(cellsHit, numRun)
+    board.drawBoard(cellsHit, numRun, starFactorWeights)
     return board
 
 def batchRun(board, numScientists, numRuns):
@@ -43,7 +45,7 @@ def batchRun(board, numScientists, numRuns):
     for j in range(numRuns):
         # keep track of which cells the scientists are hitting to check overlap
         # funding for the first year is determined randomly
-        board.distributeFundingCell(chooseCellToFund, funding, exp)
+        board.distributeFundingCell(chooseCellToFund, funding, exp, starFactorWeights)
 
         # gives which scientists are at that location
         board.cellsHit = {}

@@ -15,11 +15,14 @@ class Scientist():
         """String representation of Scientist"""
         return str([self.impact, self.career, self.citcount, self.funding])
 
-    def getStarFactor(self):
+    def getStarFactor(self, starFactorWeights):
         """calculates starFactor based on scientist's parameters"""
-        num = (self.impact-(31 - self.career)) + (self.citcount-(31 - self.career)) + (self.funding-(31 - self.career))
+        # weights of each factor in the calculation of starFactor
+        c = starFactorWeights["citation"]
+        i = starFactorWeights["impact"]
+        f = starFactorWeights["funding"]
         denom = (31 - self.career) 
-        overall = num/denom
+        overall = (c*self.citcount + i*self.impact + f*self.funding)/denom - 2*denom
         return overall
 
     def probCell(self, board, weights, exp):
@@ -93,40 +96,36 @@ class Scientist():
         self.career -= 1
         return self.impact
 
-    def citeProbs(self, val):
+    def citeProbs(self, val, starFactorWeights):
         """probability distribution of citing scientists in a cell"""
         # Calculate the probabilities for each cell
         probabilities = np.zeros_like(val)
 
         denominator = 0
         for sci in val:
-            star = sci.getStarFactor()
+            star = sci.getStarFactor(starFactorWeights)
             # ensure numbers are in reasonable range
             if star <= -1:
                 star = 1/abs(star)
-            elif star >= 1:
-                star = star
-            else:
+            elif star < 1:
                 star = 1
 
             denominator += np.exp(star) 
 
         for i in range(len(val)):
-            star = val[i].getStarFactor()
+            star = val[i].getStarFactor(starFactorWeights)
             if star <= -1:
                 star = 1/abs(star)
-            elif star >= 1:
-                star = star
-            else:
+            elif star < 1:
                 star = 1
 
             numerator = np.exp(star)
             probabilities[i] = numerator / denominator
         return probabilities
 
-    def cite(self, val):
+    def cite(self, val, starFactorWeights):
         """decides which other scientists in the cell get cited"""
-        probs = self.citeProbs(val)
+        probs = self.citeProbs(val, starFactorWeights)
         # randomly choose how many other scientists to cite, not including themselves
         numCites = np.random.randint(0, len(val) + 1)
         choice = random.choices(val, weights=probs, k=numCites)
