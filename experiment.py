@@ -68,9 +68,7 @@ def experiment(numScientists, numRuns, numExperiments, boardDimension, ):
         for l in sStats:
             if len(l) > maxlen:
                 maxlen = len(l)
-        print(maxlen)
         header = ['Total Funding Accumulated', 'starFactor', 'Citation Count']*(maxlen//3)
         writer.writerow(header)
         writer.writerows(sStats)
-    print(sStats)
     return
