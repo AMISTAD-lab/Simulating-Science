@@ -57,14 +57,19 @@ def experiment(numScientists, numRuns, numExperiments, boardDimension, ):
     cellStats = "cellStats.csv"
     with open(cellStats, 'w', newline='') as file:
         writer = csv.writer(file)
-        header = ['Location', 'Funds', 'Payoff Extracted']
+        header = ['Location', 'Funds', 'Payoff Extracted']*(boardDimension**2)
         writer.writerow(header)
         writer.writerows(cStats)
     
     sciStats = "sciStats.csv"
     with open(sciStats, 'w', newline='') as file:
         writer = csv.writer(file)
-        header = ['Total Funding Accumulated', 'starFactor', 'Citation Count']
+        maxlen = len(sStats[0])
+        for l in sStats:
+            if len(l) > maxlen:
+                maxlen = len(l)
+        print(maxlen)
+        header = ['Total Funding Accumulated', 'starFactor', 'Citation Count']*(maxlen//3)
         writer.writerow(header)
         writer.writerows(sStats)
     print(sStats)
