@@ -11,8 +11,11 @@
     "exp" :
     {"num" : 3},
 
-    "payoff" : 
+    "payoffExtraction" : 
     {"N" : 15, "D" : 10, "p" : 0.5},
+
+    "zeroPayoff" :
+    {"probability" : 0},
 
     "star" :
     {"impact" : 1, "citation" : 1, "funding" : 1}

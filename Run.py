@@ -57,7 +57,9 @@ def batchRun(board, numScientists, numRuns, data):
                 if (scientist.funding <= funding["minimum"]):
                     attrition += 1
                 # record the data of scientists who left science
-                board.sStats.append([scientist.funding, scientist.getStarFactor(starFactorWeights), scientist.citcount])
+                board.sStats.append(scientist.funding)
+                board.sStats.append(scientist.getStarFactor(starFactorWeights))
+                board.sStats.append(scientist.citcount)
                 dept.remove(scientist)
                 dept.append(Scientist())
         oneRun(board, board.cellsHit, j+1, starFactorWeights)
@@ -77,7 +79,9 @@ def batchRun(board, numScientists, numRuns, data):
 
     # add the scientist stats from the ten scientists at the very end
     for scientist in dept:
-        board.sStats.append([scientist.funding, scientist.getStarFactor(starFactorWeights), scientist.citcount])
+        board.sStats.append(scientist.funding)
+        board.sStats.append(scientist.getStarFactor(starFactorWeights))
+        board.sStats.append(scientist.citcount)
 
     # add percentage of board discovered and attrition stats
     board.bStats = [(board.totalPayoff - currTotal)/board.totalPayoff*100, 
@@ -87,6 +91,8 @@ def batchRun(board, numScientists, numRuns, data):
     for x in range(board.rows):
             for y in range(board.cols):
                 cell = board.board[x][y]
-                board.cStats.append([cell.totalFunds, board.getVisPayoff(cell.location)])
+                board.cStats.append(cell.location)
+                board.cStats.append(cell.totalFunds)
+                board.cStats.append(board.getVisPayoff(cell.location))
     return [board.bStats, board.cStats, board.sStats]
 
