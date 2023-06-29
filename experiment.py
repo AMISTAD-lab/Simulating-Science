@@ -1,10 +1,36 @@
 import json
 import csv
+import sqlite3
 from Run import *
 
 inp = "default.json"
 with open(inp, "r") as params:
     data = json.load(params)
+
+# setting up sql database connection
+conn = sqlite3.connect('data.db')
+
+# Define the table structure
+conn.execute('''CREATE TABLE IF NOT EXISTS bStats (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    payoffExtracted FLOAT,
+                    attrition INTEGER,
+                    attritionRate FLOAT
+                )''')
+
+def writeData(bStats, cStats, sStats):
+
+    # Create an INSERT statement with placeholders
+    insert_query = "INSERT INTO bStats (payoffExtracted, attrition, attritionRate) VALUES (?, ?, ?)"
+
+    # Bind values from the object to the INSERT statement
+    values = (bStats[0], bStats[1], bStats[2])
+
+    # Execute the INSERT statement
+    conn.execute(insert_query, values)
+
+    # Commit the changes and close the connection
+    conn.commit()
 
 def experiment(numScientists, numRuns, numExperiments, boardDimension, ):
     """
@@ -44,13 +70,14 @@ def experiment(numScientists, numRuns, numExperiments, boardDimension, ):
         bStats.append(batchResult[0])
         cStats.append(batchResult[1])
         sStats.append(batchResult[2])
+        writeData(bStats[x], cStats[0], sStats[0])
 
     # write stats to csv output file
     # each experiment's stats appear in one row
     boardStats = "boardStats.csv"
     with open(boardStats, 'w', newline='') as file:
         writer = csv.writer(file)
-        header = ['Percentage Payoff Discovered', 'Attrition']
+        header = ['Percentage Payoff Discovered', 'Attrition', 'Attrition Rate']
         writer.writerow(header)
         writer.writerows(bStats)
 
@@ -68,7 +95,9 @@ def experiment(numScientists, numRuns, numExperiments, boardDimension, ):
         for l in sStats:
             if len(l) > maxlen:
                 maxlen = len(l)
-        header = ['Total Funding Accumulated', 'starFactor', 'Citation Count']*(maxlen//3)
+        header = ['ID', 'Total Funding Accumulated', 'starFactor', 'Citation Count']*(maxlen//3)
         writer.writerow(header)
         writer.writerows(sStats)
+
+    conn.close()
     return

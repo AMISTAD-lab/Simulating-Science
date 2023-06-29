@@ -34,8 +34,9 @@ def batchRun(board, numScientists, numRuns, data):
     # semi-firm parameters that you could easily change but probabily won't need to
     exp = data["exp"]["num"]
     starFactorWeights = data["star"]
+    totalScientists = numScientists
 
-    dept = [Scientist() for i in range(numScientists)]
+    dept = [Scientist(i) for i in range(numScientists)]
     attrition = 0
     for j in range(numRuns):
         # keep track of which cells the scientists are hitting to check overlap
@@ -63,7 +64,8 @@ def batchRun(board, numScientists, numRuns, data):
                 board.sStats.append(scientist.getStarFactor(starFactorWeights))
                 board.sStats.append(scientist.citcount)
                 dept.remove(scientist)
-                dept.append(Scientist())
+                dept.append(Scientist(totalScientists))
+                totalScientists += 1
         oneRun(board, board.cellsHit, j+1, starFactorWeights)
         # print("Board with payoff values: ", oneRun(board, board.cellsHit, j+1, starFactorWeights))
         # print()
@@ -81,13 +83,14 @@ def batchRun(board, numScientists, numRuns, data):
 
     # add the scientist stats from the ten scientists at the very end
     for scientist in dept:
+        board.sStats.append(scientist.id)
         board.sStats.append(scientist.funding)
         board.sStats.append(scientist.getStarFactor(starFactorWeights))
         board.sStats.append(scientist.citcount)
 
     # add percentage of board discovered and attrition stats
     board.bStats = [(board.totalPayoff - currTotal)/board.totalPayoff*100, 
-                    attrition]
+                    attrition, attrition/totalScientists]
 
     # get cell funds and payoff of the board at the end
     for x in range(board.rows):

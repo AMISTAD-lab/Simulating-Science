@@ -3,13 +3,14 @@ import random
 from classCell import *
 
 class Scientist():
-    def __init__(self):
+    def __init__(self, id):
         self.career = np.random.randint(1, 31)
         # citcount and impact corresponds to where you are in your career
         # they should be at least one so we don't divide by 0
         self.impact = abs(np.random.randint(20 - self.career, 35 - self.career)) + 1
         self.citcount = abs(np.random.randint(20 - self.career, 35 - self.career)) + 1
         self.funding = abs(np.random.randint(20 - self.career, 35 - self.career)) + 1
+        self.id = id
 
     def __repr__(self):
         """String representation of Scientist"""
