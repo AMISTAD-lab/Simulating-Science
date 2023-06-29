@@ -17,7 +17,9 @@ def oneRun(board, cellsHit, numRun, starFactorWeights):
                 scientist.cite(val, starFactorWeights)
         else:
             val[0].sciQuery(key, board)
-    board.drawBoard(cellsHit, numRun, starFactorWeights)
+    board.updateNumSciHits()
+    # UNCOMMENT FOR VISUALIZATION
+    #board.drawBoard(cellsHit, numRun, starFactorWeights)
     return board
 
 def batchRun(board, numScientists, numRuns, data):
@@ -71,11 +73,11 @@ def batchRun(board, numScientists, numRuns, data):
     print("Percentage of total payoff discovered: ", f"{((board.totalPayoff - currTotal)/board.totalPayoff)*100:.2f}")
     print()
 
-    #animating plots
-    frames = [Image.open(f'plots/plot{i+1}.png') for i in range(numRuns)]
-    frame_one = frames[0]
-    frame_one.save("animation.gif", format="GIF", append_images=frames,
-            save_all=True, duration=500, loop=1)
+    # #animating plots
+    # frames = [Image.open(f'plots/plot{i+1}.png') for i in range(numRuns)]
+    # frame_one = frames[0]
+    # frame_one.save("animation.gif", format="GIF", append_images=frames,
+    #         save_all=True, duration=500, loop=0)
 
     # add the scientist stats from the ten scientists at the very end
     for scientist in dept:

@@ -148,8 +148,8 @@ class Board():
                     starWeight = chooseCellToFund["starFactor"]
 
                 visWeight = chooseCellToFund["visPayoff"] * (self.getVisPayoff(cell.location))
-                numHitsWeight = chooseCellToFund["numHits"] * (cell.numHits)
-                recentHitsWeight = chooseCellToFund["numSciHits"] * (cell.numSciHits)
+                numHitsWeight = chooseCellToFund["totalHits"] * (cell.numHits)
+                recentHitsWeight = chooseCellToFund["recentHits"] * (cell.numSciHits)
 
                 numerator = (visWeight + starWeight + numHitsWeight + recentHitsWeight) ** exp
                 probabilities[j][k] = numerator / denominator
@@ -160,6 +160,16 @@ class Board():
                 if cell.location in self.cellsHit.keys():
                     self.distributeFundingSci(cell, self.cellsHit[cell.location], cell.funds, starFactorWeights)
         return probabilities
+
+    def updateNumSciHits(self):
+        """updates the cellsHit dictionary for the current board"""
+        for i in range(self.rows):
+            for j in range(self.cols):
+                cell = self.board[i][j]
+                # finding the number of scientists on each cell each round
+                cell.numSciHits = 0
+                if cell.location in self.cellsHit.keys():
+                    cell.numSciHits = len(self.cellsHit[cell.location])
 
     def drawBoard(self, cellsHit, numRun, starFactorWeights):
         """produces a plot of the board for a given run and saves the image"""
@@ -175,6 +185,7 @@ class Board():
                 cell = self.board[i][j]
                 # compare to original payoff color
                 # we want at least some of the original payoff to show
+
                 if self.originalPays[j][i] != 0:
                     if cell.payoff/self.originalPays[j][i] < 0.1:
                         rect=patches.Rectangle((i-0.5,j-0.51),
@@ -189,10 +200,12 @@ class Board():
                                 color=plotColors[j][i],
                                 linewidth=0.4)
                     plt.gca().add_patch(rect)
-                # finding the number of scientists on each cell each round
-                cell.numSciHits = 0
-                if cell.location in cellsHit.keys():
-                    cell.numSciHits = len(cellsHit[cell.location])
+                    
+                # # finding the number of scientists on each cell each round
+                # cell.numSciHits = 0
+                # if cell.location in cellsHit.keys():
+                #     cell.numSciHits = len(cellsHit[cell.location])
+                    
                     # plotting the "dot" scientists
                     for x in range(1, cell.numSciHits + 1):
                         scientist = cellsHit[cell.location][x-1]
