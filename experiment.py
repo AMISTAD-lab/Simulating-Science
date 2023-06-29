@@ -13,18 +13,17 @@ conn = sqlite3.connect('data.db')
 # Define the table structure
 conn.execute('''CREATE TABLE IF NOT EXISTS bStats (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    inputStr STRING,
                     payoffExtracted FLOAT,
                     attrition INTEGER,
                     attritionRate FLOAT
                 )''')
 
-def writeData(bStats, cStats, sStats):
+def writeData(inputStr, bStats, cStats, sStats):
 
     # Create an INSERT statement with placeholders
-    insert_query = "INSERT INTO bStats (payoffExtracted, attrition, attritionRate) VALUES (?, ?, ?)"
-
-    # Bind values from the object to the INSERT statement
-    values = (bStats[0], bStats[1], bStats[2])
+    insert_query = "INSERT INTO bStats (inputStr, payoffExtracted, attrition, attritionRate) VALUES (?, ?, ?, ?)"
+    values = (inputStr, bStats[0], bStats[1], bStats[2])
 
     # Execute the INSERT statement
     conn.execute(insert_query, values)
@@ -41,6 +40,7 @@ def experiment(numScientists, numRuns, numExperiments, boardDimension, ):
         fundDistributionFactors numHits 0.5
     """
     inputStr = input()
+    fullInput = []
     while inputStr != "":
         if len(inputStr.split()) == 3:
             typeParam = inputStr.split()[0]
@@ -48,6 +48,7 @@ def experiment(numScientists, numRuns, numExperiments, boardDimension, ):
             newNum = float(inputStr.split()[2])
             if typeParam in data.keys() and param in data[typeParam].keys():
                 data[typeParam][param] = newNum
+                fullInput.append(inputStr)
             else:
                 print("parameter you entered does not follow the default style", typeParam, param)
                 return
@@ -55,6 +56,7 @@ def experiment(numScientists, numRuns, numExperiments, boardDimension, ):
             print("check input format - input must be of different length")
             return
         inputStr = input()
+    fullInput = ", ".join(fullInput)
 
     N = data["payoffExtraction"]["N"]
     D = data["payoffExtraction"]["D"]
@@ -70,7 +72,7 @@ def experiment(numScientists, numRuns, numExperiments, boardDimension, ):
         bStats.append(batchResult[0])
         cStats.append(batchResult[1])
         sStats.append(batchResult[2])
-        writeData(bStats[x], cStats[0], sStats[0])
+        writeData(fullInput, bStats[x], cStats[0], sStats[0])
 
     # write stats to csv output file
     # each experiment's stats appear in one row
