@@ -8,7 +8,7 @@ from classScientist import *
 # setting up sql database connection
 conn = sqlite3.connect('data.db')
 
-def oneRun(board, cellsHit, numRun, starFactorWeights, dept, numScientists):
+def oneRun(board, cellsHit, numRun, starFactorWeights, dept, numScientists, numRuns):
     """runs query simulation for one year"""
     for key, val in cellsHit.items():
         #more than one scientist
@@ -25,12 +25,30 @@ def oneRun(board, cellsHit, numRun, starFactorWeights, dept, numScientists):
         insert_query = '''INSERT INTO sStats (uniqId''' + str(i) + ''', funds''' + str(i) + ''', starFactor''' + str(i) + ''', citations''' + str(i) + ''') VALUES (?, ?, ?, ?)'''
         values = (dept[i].id, dept[i].funding, dept[i].getStarFactor(starFactorWeights), dept[i].citcount)
         conn.execute(insert_query, values)
+        conn.commit()
+
+        conn.execute('''UPDATE sStats SET uniqId''' + str(i) + ''' = ? WHERE id = ?''', (dept[i].id, numRun))
+        conn.execute('''UPDATE sStats SET funds''' + str(i) + ''' = ? WHERE id = ?''', (dept[i].funding, numRun))
+        conn.execute('''UPDATE sStats SET starFactor''' + str(i) + ''' = ? WHERE id = ?''', (dept[i].getStarFactor(starFactorWeights), numRun))
+        conn.execute('''UPDATE sStats SET citations''' + str(i) + ''' = ? WHERE id = ?''', (dept[i].citcount, numRun))
+
+        conn.execute('''DELETE from sStats where id > ''' + str(numRuns))
+        conn.commit()
 
     for i in range(board.rows*board.cols):
         insert_query = '''INSERT INTO cStats (location''' + str(i) + ''', funds''' + str(i) + ''', payoffExtracted''' + str(i) + ''') VALUES (?, ?, ?)'''
         l = board.flatten(board.board)
         values = (str(l[i].location), l[i].funds, board.getVisPayoff(l[i].location))
         conn.execute(insert_query, values)
+        conn.commit()
+
+        l = board.flatten(board.board)
+        conn.execute('''UPDATE cStats SET location''' + str(i) + ''' = ? WHERE id = ?''', (str(l[i].location), numRun))
+        conn.execute('''UPDATE cStats SET funds''' + str(i) + ''' = ? WHERE id = ?''', (l[i].funds, numRun))
+        conn.execute('''UPDATE cStats SET payoffExtracted''' + str(i) + ''' = ? WHERE id = ?''', (board.getVisPayoff(l[i].location), numRun))
+
+        conn.execute('''DELETE from cStats where id > ''' + str(numRuns))
+        conn.commit()
 
     conn.commit()
     # UNCOMMENT FOR VISUALIZATION
@@ -106,13 +124,11 @@ def batchRun(board, numScientists, numRuns, data):
                 board.sStats.append(scientist.funding)
                 board.sStats.append(scientist.getStarFactor(starFactorWeights))
                 board.sStats.append(scientist.citcount)
-                print("dead: ", scientist.id)
                 dept.remove(scientist)
                 dept.append(Scientist(totalScientists))
                 totalScientists += 1
-                print("new scientist: ", totalScientists)
-        oneRun(board, board.cellsHit, j+1, starFactorWeights, dept, numScientists)
-        # print("Board with payoff values: ", oneRun(board, board.cellsHit, j+1, starFactorWeights, dept, numScientists))
+        oneRun(board, board.cellsHit, j+1, starFactorWeights, dept, numScientists, numRuns)
+        # print("Board with payoff values: ", oneRun(board, board.cellsHit, j+1, starFactorWeights, dept, numScientists, numRuns))
         # print()
 
     currTotal = sum(board.flatten(board.getPayoffs()))
