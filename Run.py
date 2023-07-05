@@ -21,17 +21,16 @@ def oneRun(board, cellsHit, numRun, starFactorWeights, dept, numScientists):
         else:
             val[0].sciQuery(key, board)
     board.updateNumSciHits()
-    conn.execute('''DROP TABLE IF EXISTS sStats''')
-    conn.execute('''CREATE TABLE IF NOT EXISTS sStats (
-                        id INTEGER PRIMARY KEY AUTOINCREMENT,
-                        inputStr STRING
-                    )''')
+    for i in range(len(dept)):
+        insert_query = '''INSERT INTO sStats (uniqId''' + str(i) + ''', funds''' + str(i) + ''', starFactor''' + str(i) + ''', citations''' + str(i) + ''') VALUES (?, ?, ?, ?)'''
+        values = (dept[i].id, dept[i].funding, dept[i].getStarFactor(starFactorWeights), dept[i].citcount)
+        conn.execute(insert_query, values)
 
-    for i in range(numScientists):
-        conn.execute('''ALTER TABLE sStats ADD uniqId''' + str(i) + ''' INTEGER''')
-        conn.execute('''ALTER TABLE sStats ADD funds''' + str(i) + ''' FLOAT''')
-        conn.execute('''ALTER TABLE sStats ADD starFactor''' + str(i) + ''' FLOAT''')
-        conn.execute('''ALTER TABLE sStats ADD citations''' + str(i) + ''' INTEGER''')
+    for i in range(board.rows*board.cols):
+        insert_query = '''INSERT INTO cStats (location''' + str(i) + ''', funds''' + str(i) + ''', payoffExtracted''' + str(i) + ''') VALUES (?, ?, ?)'''
+        l = board.flatten(board.board)
+        values = (str(l[i].location), l[i].funds, board.getVisPayoff(l[i].location))
+        conn.execute(insert_query, values)
 
     conn.commit()
     # UNCOMMENT FOR VISUALIZATION
@@ -54,6 +53,33 @@ def batchRun(board, numScientists, numRuns, data):
 
     dept = [Scientist(i) for i in range(numScientists)]
     attrition = 0
+
+    # Define the table structure for cells and scientists
+    conn.execute('''DROP TABLE IF EXISTS cStats''')
+
+    conn.execute('''CREATE TABLE IF NOT EXISTS cStats (
+                        id INTEGER PRIMARY KEY AUTOINCREMENT
+                    )''')
+
+    for i in range(board.rows*board.cols):
+        conn.execute('''ALTER TABLE cStats ADD location''' + str(i) + ''' STRING''')
+        conn.execute('''ALTER TABLE cStats ADD funds''' + str(i) + ''' FLOAT''')
+        conn.execute('''ALTER TABLE cStats ADD payoffExtracted''' + str(i) + ''' FLOAT''')
+    
+    conn.execute('''DROP TABLE IF EXISTS sStats''')
+    conn.execute('''CREATE TABLE IF NOT EXISTS sStats (
+                        id INTEGER PRIMARY KEY AUTOINCREMENT
+                    )''')
+
+    for i in range(numScientists):
+        conn.execute('''ALTER TABLE sStats ADD uniqId''' + str(i) + ''' INTEGER''')
+        conn.execute('''ALTER TABLE sStats ADD funds''' + str(i) + ''' FLOAT''')
+        conn.execute('''ALTER TABLE sStats ADD starFactor''' + str(i) + ''' FLOAT''')
+        conn.execute('''ALTER TABLE sStats ADD citations''' + str(i) + ''' INTEGER''')
+
+
+    conn.commit()
+
     for j in range(numRuns):
         # keep track of which cells the scientists are hitting to check overlap
         # funding for the first year is determined randomly
@@ -119,21 +145,6 @@ def batchRun(board, numScientists, numRuns, data):
                 board.cStats.append(cell.totalFunds)
                 board.cStats.append(board.getVisPayoff(cell.location))
     
-    # Define the table structure for cells and scientists
-    conn.execute('''DROP TABLE IF EXISTS cStats''')
-
-    conn.execute('''CREATE TABLE IF NOT EXISTS cStats (
-                        id INTEGER PRIMARY KEY AUTOINCREMENT,
-                        inputStr STRING
-                    )''')
-
-    for i in range(board.rows*board.cols):
-        conn.execute('''ALTER TABLE cStats ADD location''' + str(i) + ''' STRING''')
-        conn.execute('''ALTER TABLE cStats ADD funds''' + str(i) + ''' FLOAT''')
-        conn.execute('''ALTER TABLE cStats ADD payoffExtracted''' + str(i) + ''' FLOAT''')
-    
-
-    conn.commit()
 
     return [board.bStats, board.cStats, board.sStats]
 
