@@ -7,6 +7,26 @@ inp = "default.json"
 with open(inp, "r") as params:
     data = json.load(params)
 
+# setting up sql database connection
+conn = sqlite3.connect('data.db')
+
+# Define the table structure
+conn.execute('''CREATE TABLE IF NOT EXISTS bStats (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    inputStr STRING,
+                    payoffExtracted FLOAT,
+                    attrition INTEGER,
+                    attritionRate FLOAT
+                )''')
+
+def writeBStats(inputStr, bStats):
+
+    # Create an INSERT statement with placeholders
+    insert_query = "INSERT INTO bStats (inputStr, payoffExtracted, attrition, attritionRate) VALUES (?, ?, ?, ?)"
+    values = (inputStr, bStats[0], bStats[1], bStats[2])
+    conn.execute(insert_query, values)
+    conn.commit()
+
 def experiment(numScientists, numRuns, numExperiments, boardDimension, ):
     """
     runs with given parameters and saves to csv file
@@ -48,6 +68,7 @@ def experiment(numScientists, numRuns, numExperiments, boardDimension, ):
         bStats.append(batchResult[0])
         cStats.append(batchResult[1])
         sStats.append(batchResult[2])
+        writeBStats(fullInput, bStats[x])
 
     # write stats to csv output file
     # each experiment's stats appear in one row
@@ -72,60 +93,9 @@ def experiment(numScientists, numRuns, numExperiments, boardDimension, ):
         for l in sStats:
             if len(l) > maxlen:
                 maxlen = len(l)
-        header = ['ID', 'Total Funding Accumulated', 'starFactor', 'Citation Count']*(maxlen//3)
+        header = ['ID', 'Total Funding Accumulated', 'starFactor', 'Citation Count']*(maxlen//4)
         writer.writerow(header)
         writer.writerows(sStats)
 
+    conn.close()
     return
-
-
-# setting up sql database connection
-conn = sqlite3.connect('data.db')
-
-# Define the table structure
-conn.execute('''CREATE TABLE IF NOT EXISTS bStats (
-                payoffExtracted FLOAT,
-                attrition INTEGER,
-                attritionRate FLOAT
-                )''')
-conn.execute('''CREATE TABLE IF NOT EXISTS cStats (
-                location STRING,
-                funds FLOAT,
-                payoffExtracted FLOAT
-                )''')
-conn.execute('''CREATE TABLE IF NOT EXISTS sStats (
-                uniqId INTEGER,
-                totalFunding FLOAT,
-                starFactor FLOAT,
-                citationCount INTEGER
-                )''')
-
-
-with open ('boardStats.csv', 'r') as f:
-    reader = csv.reader(f)
-    data = next(reader) 
-    query = 'insert into bStats values ({0})'
-    query = query.format(','.join('?' * len(data)))
-    conn.execute(query, data)
-    for data in reader:
-        conn.execute(query, data)
-    conn.commit()
-with open ('cellStats.csv', 'r') as f:
-    reader = csv.reader(f)
-    data = next(reader) 
-    query = 'insert into cStats values ({0})'
-    query = query.format(','.join('?' * len(data)))
-    conn.execute(query, data)
-    for data in reader:
-        conn.execute(query, data)
-    conn.commit()
-with open ('sciStats.csv', 'r') as f:
-    reader = csv.reader(f)
-    data = next(reader) 
-    query = 'insert into sStats values ({0})'
-    query = query.format(','.join('?' * len(data)))
-    conn.execute(query, data)
-    for data in reader:
-        conn.execute(query, data)
-    conn.commit()
-conn.close()

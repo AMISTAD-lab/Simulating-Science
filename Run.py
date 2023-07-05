@@ -1,11 +1,14 @@
 import numpy as np
-import json
+import sqlite3
 from PIL import Image
 from classCell import *
 from classBoard import *
 from classScientist import *
 
-def oneRun(board, cellsHit, numRun, starFactorWeights):
+# setting up sql database connection
+conn = sqlite3.connect('data.db')
+
+def oneRun(board, cellsHit, numRun, starFactorWeights, dept, numScientists):
     """runs query simulation for one year"""
     for key, val in cellsHit.items():
         #more than one scientist
@@ -18,6 +21,19 @@ def oneRun(board, cellsHit, numRun, starFactorWeights):
         else:
             val[0].sciQuery(key, board)
     board.updateNumSciHits()
+    conn.execute('''DROP TABLE IF EXISTS sStats''')
+    conn.execute('''CREATE TABLE IF NOT EXISTS sStats (
+                        id INTEGER PRIMARY KEY AUTOINCREMENT,
+                        inputStr STRING
+                    )''')
+
+    for i in range(numScientists):
+        conn.execute('''ALTER TABLE sStats ADD uniqId''' + str(i) + ''' INTEGER''')
+        conn.execute('''ALTER TABLE sStats ADD funds''' + str(i) + ''' FLOAT''')
+        conn.execute('''ALTER TABLE sStats ADD starFactor''' + str(i) + ''' FLOAT''')
+        conn.execute('''ALTER TABLE sStats ADD citations''' + str(i) + ''' INTEGER''')
+
+    conn.commit()
     # UNCOMMENT FOR VISUALIZATION
     #board.drawBoard(cellsHit, numRun, starFactorWeights)
     return board
@@ -60,14 +76,17 @@ def batchRun(board, numScientists, numRuns, data):
                 if (scientist.funding <= funding["minimum"]):
                     attrition += 1
                 # record the data of scientists who left science
+                board.sStats.append(scientist.id)
                 board.sStats.append(scientist.funding)
                 board.sStats.append(scientist.getStarFactor(starFactorWeights))
                 board.sStats.append(scientist.citcount)
+                print("dead: ", scientist.id)
                 dept.remove(scientist)
                 dept.append(Scientist(totalScientists))
                 totalScientists += 1
-        oneRun(board, board.cellsHit, j+1, starFactorWeights)
-        # print("Board with payoff values: ", oneRun(board, board.cellsHit, j+1, starFactorWeights))
+                print("new scientist: ", totalScientists)
+        oneRun(board, board.cellsHit, j+1, starFactorWeights, dept, numScientists)
+        # print("Board with payoff values: ", oneRun(board, board.cellsHit, j+1, starFactorWeights, dept, numScientists))
         # print()
 
     currTotal = sum(board.flatten(board.getPayoffs()))
@@ -81,7 +100,7 @@ def batchRun(board, numScientists, numRuns, data):
     # frame_one.save("animation.gif", format="GIF", append_images=frames,
     #         save_all=True, duration=500, loop=0)
 
-    # add the scientist stats from the ten scientists at the very end
+    # add the scientist stats from the rest of the scientists at the very end
     for scientist in dept:
         board.sStats.append(scientist.id)
         board.sStats.append(scientist.funding)
@@ -99,5 +118,22 @@ def batchRun(board, numScientists, numRuns, data):
                 board.cStats.append(cell.location)
                 board.cStats.append(cell.totalFunds)
                 board.cStats.append(board.getVisPayoff(cell.location))
+    
+    # Define the table structure for cells and scientists
+    conn.execute('''DROP TABLE IF EXISTS cStats''')
+
+    conn.execute('''CREATE TABLE IF NOT EXISTS cStats (
+                        id INTEGER PRIMARY KEY AUTOINCREMENT,
+                        inputStr STRING
+                    )''')
+
+    for i in range(board.rows*board.cols):
+        conn.execute('''ALTER TABLE cStats ADD location''' + str(i) + ''' STRING''')
+        conn.execute('''ALTER TABLE cStats ADD funds''' + str(i) + ''' FLOAT''')
+        conn.execute('''ALTER TABLE cStats ADD payoffExtracted''' + str(i) + ''' FLOAT''')
+    
+
+    conn.commit()
+
     return [board.bStats, board.cStats, board.sStats]
 
