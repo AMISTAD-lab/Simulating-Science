@@ -11,9 +11,9 @@ class Board():
 
         #Max payoff value
         self.rangeVal = 30
-
         #adds # of desired zeros
-        self.randomRange = [0 for i in range(probzero)]
+        self.probzero = math.ceil(self.rangeVal/(1-self.probzero)) - self.rangeVal
+        self.randomRange = [0 for i in range(self.probzero)]
 
         #this makes 1,2,3...30 (payoff values)
         [self.randomRange.append(x) for x in range(1, self.rangeVal+1)]

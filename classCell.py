@@ -87,7 +87,9 @@ class Cell():
         self.setStepSize(self.D, self.p)
         originalPay = board.originalPays[self.location[1]][self.location[0]]
         # if we enter incremental phase, taken payoff becomes random
-        if self.payoff/originalPay >= self.incHit-1:
+        if originalPay == 0:
+            frac = 0
+        elif self.payoff/originalPay >= self.incHit-1:
             frac = np.random.random()
         else:
             frac = self.slopeVals[self.numHits]

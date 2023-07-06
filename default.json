@@ -15,7 +15,7 @@
     {"N" : 15, "D" : 10, "p" : 0.5},
 
     "zeroPayoff" :
-    {"probability" : 0},
+    {"probability" : 0.05},
 
     "star" :
     {"payoff" : 1, "citation" : 1, "funding" : 1}
