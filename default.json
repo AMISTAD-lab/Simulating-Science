@@ -1,6 +1,6 @@
 {
-    "cell" :
-    {"citation" : 0, "impact" : 0, "exploration" : 0, "funding" : 0},
+    "scientistIncentives" :
+    {"citation" : 0, "payoff" : 0, "exploration" : 0, "funding" : 0},
 
     "fund" : 
     {"total" : 100, "decrease" : 1, "minimum" : 10},
@@ -18,5 +18,5 @@
     {"probability" : 0},
 
     "star" :
-    {"impact" : 1, "citation" : 1, "funding" : 1}
+    {"payoff" : 1, "citation" : 1, "funding" : 1}
 }

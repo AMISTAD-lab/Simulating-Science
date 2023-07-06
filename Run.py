@@ -61,7 +61,7 @@ def batchRun(board, numScientists, numRuns, data):
     During each run, each scientist in the department queries the board.
     At the end, an animation of the plots of each run is generated.
     """
-    weights = data["cell"]
+    weights = data["scientistIncentives"]
     funding = data["fund"]
     chooseCellToFund = data["fundFactors"]
     # semi-firm parameters that you could easily change but probabily won't need to

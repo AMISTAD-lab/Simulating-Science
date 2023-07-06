@@ -27,7 +27,7 @@ def writeBStats(inputStr, bStats):
     conn.execute(insert_query, values)
     conn.commit()
 
-def experiment(numScientists, numRuns, numExperiments, boardDimension, ):
+def experiment(numScientists, numRuns, numExperiments, boardDimension):
     """
     runs with given parameters and saves to csv file
     enter the input(s) in the default.json you want to vary from the default in the command line like so:

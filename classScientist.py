@@ -20,7 +20,7 @@ class Scientist():
         """calculates starFactor based on scientist's parameters"""
         # weights of each factor in the calculation of starFactor
         c = starFactorWeights["citation"]
-        i = starFactorWeights["impact"]
+        i = starFactorWeights["payoff"]
         f = starFactorWeights["funding"]
         denom = (31 - self.career) 
         overall = (c*self.citcount + i*self.impact + f*self.funding)/denom - 3
@@ -41,11 +41,11 @@ class Scientist():
         # if they have a low impactToCareer difference, then they value impact more
         impactToCareer = (self.impact-(31 - self.career))
         if impactToCareer <= -1:
-            i = weights["impact"] * abs(impactToCareer)
+            i = weights["payoff"] * abs(impactToCareer)
         elif impactToCareer >= 1:
-            i = weights["impact"] * (1/impactToCareer)
+            i = weights["payoff"] * (1/impactToCareer)
         else:
-            i = weights["impact"]
+            i = weights["payoff"]
 
         # if they have a low fundToCareer difference, then they value funding more
         fundToCareer = (self.funding-(31 - self.career))
