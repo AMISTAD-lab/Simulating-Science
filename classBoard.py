@@ -158,7 +158,7 @@ class Board():
                 cell.funds = probabilities[j][k] * funding["total"]
                 cell.totalFunds += probabilities[j][k] * funding["total"]
                 if cell.location in self.cellsHit.keys():
-                    self.distributeFundingSci(cell, self.cellsHit[cell.location], cell.funds, starFactorWeights)
+                    self.distributeFundingSci(exp, self.cellsHit[cell.location], cell.funds, starFactorWeights)
         return probabilities
 
     def updateNumSciHits(self):
