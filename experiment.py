@@ -10,7 +10,8 @@ with open(inp, "r") as params:
 # setting up sql database connection
 conn = sqlite3.connect('data.db')
 
-# Define the table structure
+# Define the schema
+
 conn.execute('''CREATE TABLE IF NOT EXISTS bStats (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
                     inputStr STRING,
@@ -19,9 +20,39 @@ conn.execute('''CREATE TABLE IF NOT EXISTS bStats (
                     attritionRate FLOAT
                 )''')
 
-def writeBStats(inputStr, bStats):
+conn.execute('''CREATE TABLE IF NOT EXISTS cStats (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    inputStr STRING,
+                    numRun INTEGER,
+                    location STRING,
+                    funds FLOAT,
+                    payoffExtracted FLOAT
+                )''')
 
-    # Create an INSERT statement with placeholders
+conn.execute('''CREATE TABLE IF NOT EXISTS sStats (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    inputStr STRING,
+                    numRun INTEGER,
+                    uniqId INTEGER,
+                    funds FLOAT,
+                    starFactor FLOAT,
+                    citations INTEGER
+                )''')
+
+conn.execute('''CREATE TABLE IF NOT EXISTS runStats (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    inputStrSci STRING,
+                    numRunSci INTEGER,
+                    inputStrCell STRING,
+                    numRunCell INTEGER,
+                    FOREIGN KEY (inputStrSci) REFERENCES sStats(inputStr),
+                    FOREIGN KEY (numRunSci) REFERENCES sStats(numRun),
+                    FOREIGN KEY (inputStrCell) REFERENCES cStats(inputStr),
+                    FOREIGN KEY (numRunCell) REFERENCES cStats(numRun)
+                )''')
+conn.commit()
+
+def writeBStats(inputStr, bStats):
     insert_query = "INSERT INTO bStats (inputStr, payoffExtracted, attrition, attritionRate) VALUES (?, ?, ?, ?)"
     values = (inputStr, bStats[0], bStats[1], bStats[2])
     conn.execute(insert_query, values)
@@ -64,7 +95,7 @@ def experiment(numScientists, numRuns, numExperiments, boardDimension):
     sStats = []
     for x in range(numExperiments):
         board = Board(boardDimension, boardDimension, probZero, N, D, p)
-        batchResult = batchRun(board, numScientists, numRuns, data)
+        batchResult = batchRun(board, numScientists, numRuns, data, fullInput)
         bStats.append(batchResult[0])
         cStats.append(batchResult[1])
         sStats.append(batchResult[2])
@@ -82,20 +113,18 @@ def experiment(numScientists, numRuns, numExperiments, boardDimension):
     cellStats = "cellStats.csv"
     with open(cellStats, 'w', newline='') as file:
         writer = csv.writer(file)
-        header = ['Location', 'Funds', 'Payoff Extracted']*(boardDimension**2)
+        header = ['Input', 'Location', 'Funds', 'Payoff Extracted']
         writer.writerow(header)
-        writer.writerows(cStats)
-    
+        for l in cStats:
+            writer.writerows(l)
+ 
     sciStats = "sciStats.csv"
     with open(sciStats, 'w', newline='') as file:
         writer = csv.writer(file)
-        maxlen = len(sStats[0])
-        for l in sStats:
-            if len(l) > maxlen:
-                maxlen = len(l)
-        header = ['ID', 'Total Funding Accumulated', 'starFactor', 'Citation Count']*(maxlen//4)
+        header = ['Input', 'ID', 'Total Funding Accumulated', 'starFactor', 'Citation Count']
         writer.writerow(header)
-        writer.writerows(sStats)
+        for l in sStats:
+            writer.writerows(l)
 
     conn.close()
     return
