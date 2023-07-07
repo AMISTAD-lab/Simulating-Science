@@ -8,7 +8,7 @@ from classScientist import *
 # setting up sql database connection
 conn = sqlite3.connect('data.db')
 
-def oneRun(board, cellsHit, numRun, starFactorWeights, dept, numScientists, numRuns):
+def oneRun(board, cellsHit, numRun, starFactorWeights, dept, exp, numRuns):
     """runs query simulation for one year"""
     for key, val in cellsHit.items():
         #more than one scientist
@@ -17,7 +17,7 @@ def oneRun(board, cellsHit, numRun, starFactorWeights, dept, numScientists, numR
             sciOrder = np.random.permutation(val)
             for scientist in sciOrder:
                 scientist.sciQuery(key, board)
-                scientist.cite(val, starFactorWeights)
+                scientist.cite(val, starFactorWeights, exp)
         else:
             val[0].sciQuery(key, board)
     board.updateNumSciHits()
@@ -127,8 +127,8 @@ def batchRun(board, numScientists, numRuns, data):
                 dept.remove(scientist)
                 dept.append(Scientist(totalScientists))
                 totalScientists += 1
-        oneRun(board, board.cellsHit, j+1, starFactorWeights, dept, numScientists, numRuns)
-        # print("Board with payoff values: ", oneRun(board, board.cellsHit, j+1, starFactorWeights, dept, numScientists, numRuns))
+        oneRun(board, board.cellsHit, j+1, starFactorWeights, dept, exp, numRuns)
+        # print("Board with payoff values: ", oneRun(board, board.cellsHit, j+1, starFactorWeights, dept, exp, numRuns))
         # print()
 
     currTotal = sum(board.flatten(board.getPayoffs()))

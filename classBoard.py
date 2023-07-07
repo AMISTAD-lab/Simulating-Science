@@ -55,7 +55,7 @@ class Board():
         """turns a 2D matrix into a 1D list"""
         return [matrix[i][j] for j in range(len(matrix[0])) for i in range(len(matrix))]
 
-    def distributeFundingSci(self, cell, dept, cellFunding, starFactorWeights):
+    def distributeFundingSci(self, exp, dept, cellFunding, starFactorWeights):
         """
         distribute the funding allotted for each cell to the scientists in the cell
         """
@@ -68,7 +68,7 @@ class Board():
                 star = 1/abs(star)
             elif star < 1:
                 star = 1
-            denominator += np.exp(star)
+            denominator += star ** exp
 
         for i in range(len(dept)):
             star = dept[i].getStarFactor(starFactorWeights)
@@ -76,7 +76,7 @@ class Board():
                 star = 1/abs(star)
             elif star < 1:
                 star = 1
-            numerator = np.exp(star)
+            numerator = star ** exp
             
             probabilities[i] = numerator / denominator
             # distribute funding based on starFactor for each scientist compared to whole department
@@ -125,7 +125,7 @@ class Board():
                     cell.funds = probabilities[i][j] * funding["total"]
                     cell.totalFunds += probabilities[i][j] * funding["total"]
                     if cell.location in self.cellsHit.keys():
-                        self.distributeFundingSci(cell, self.cellsHit[cell.location], cell.funds, starFactorWeights)
+                        self.distributeFundingSci(exp, self.cellsHit[cell.location], cell.funds, starFactorWeights)
             return probabilities
 
         for j in range(self.rows):

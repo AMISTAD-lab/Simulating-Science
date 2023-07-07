@@ -97,7 +97,7 @@ class Scientist():
         self.career -= 1
         return self.impact
 
-    def citeProbs(self, val, starFactorWeights):
+    def citeProbs(self, val, starFactorWeights, exp):
         """probability distribution of citing scientists in a cell"""
         # Calculate the probabilities for each cell
         probabilities = np.zeros_like(val)
@@ -111,7 +111,7 @@ class Scientist():
             elif star < 1:
                 star = 1
 
-            denominator += np.exp(star) 
+            denominator += star ** exp
 
         for i in range(len(val)):
             star = val[i].getStarFactor(starFactorWeights)
@@ -120,13 +120,13 @@ class Scientist():
             elif star < 1:
                 star = 1
 
-            numerator = np.exp(star)
+            numerator = star ** exp
             probabilities[i] = numerator / denominator
         return probabilities
 
-    def cite(self, val, starFactorWeights):
+    def cite(self, val, starFactorWeights, exp):
         """decides which other scientists in the cell get cited"""
-        probs = self.citeProbs(val, starFactorWeights)
+        probs = self.citeProbs(val, starFactorWeights, exp)
         # randomly choose how many other scientists to cite, not including themselves
         numCites = np.random.randint(0, len(val) + 1)
         choice = random.choices(val, weights=probs, k=numCites)
