@@ -1,6 +1,11 @@
 import json
 import csv
 import sqlite3
+import latextable
+import pandas as pd
+import os
+from tabulate import tabulate
+from texttable import Texttable
 from Run import *
 
 inp = "default.json"
@@ -127,4 +132,46 @@ def experiment(numScientists, numRuns, numExperiments, boardDimension):
             writer.writerows(l)
 
     conn.close()
+    return
+
+def generateLaTeX(listOfFolders):
+    """
+    Outputs LaTeX code to generate tables with simulation statistics.
+    Takes in a list of csv file names within folders in the repository.
+    """
+    rows = [['Input', 'Average Percentage of Payoff Discovered', 'Average Attrition Rate']]
+    for folder in listOfFolders:
+        dirList = os.listdir(folder)
+        for file in dirList:
+            with open(file) as file_obj:
+                data = pd.read_csv(file)
+                if file == 'cellStats.csv':
+                    inputStr = data['Input'].tolist()
+                elif file == 'boardStats.csv':
+                    payoffs = data['Percentage Payoff Discovered'].tolist()
+                    attrRate = data['Attrition Rate'].tolist()
+        avgPayoff = sum(payoffs) / len(payoffs)
+        avgAttrRate = sum(attrRate) / len(attrRate)
+        if type(inputStr[0]) == str:
+            rows.append([inputStr[0], avgPayoff, avgAttrRate])
+        else:
+            rows.append(["Default", avgPayoff, avgAttrRate])
+
+    # Code inspired by https://colab.research.google.com/drive/1Iq10lHznMngg1-Uoo-QtpTPii1JDYSQA?usp=sharing#scrollTo=K7NNR1Vg40Vo
+    table = Texttable()
+    table.set_cols_align(["c"] * 3)
+    table.set_deco(Texttable.HEADER | Texttable.VLINES)
+    table.add_rows(rows)
+
+    # print('Tabulate Table:')
+    # print(tabulate(rows, headers='firstrow'))
+
+    # print('\nTexttable Table:')
+    # print(table.draw())
+
+    print('\nTabulate Latex:')
+    print(tabulate(rows, headers='firstrow', tablefmt='latex'))
+
+    print('\nTexttable Latex:')
+    print(latextable.draw_latex(table))
     return
