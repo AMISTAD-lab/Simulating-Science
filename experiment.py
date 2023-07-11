@@ -133,7 +133,7 @@ def experiment(numScientists, numRuns, numExperiments, boardDimension):
 
     conn.close()
     return
-
+    
 def generateLaTeX(listOfFolders):
     """
     Outputs LaTeX code to generate tables with simulation statistics.
@@ -151,11 +151,14 @@ def generateLaTeX(listOfFolders):
                     payoffs = data['Percentage Payoff Discovered'].tolist()
                     attrRate = data['Attrition Rate'].tolist()
         avgPayoff = sum(payoffs) / len(payoffs)
+        CIPayoff = avgPayoff - (avgPayoff - 1.96*math.sqrt(np.var(payoffs)/len(payoffs)))
+
         avgAttrRate = sum(attrRate) / len(attrRate)
+        CIAttrRate = avgAttrRate - (avgAttrRate - 1.96*math.sqrt(np.var(attrRate)/len(attrRate)))
         if type(inputStr[0]) == str:
-            rows.append([inputStr[0], avgPayoff, avgAttrRate])
+            rows.append([inputStr[0], str(avgPayoff) + " $\pm$ " + str(CIPayoff), str(avgAttrRate) + " $\pm$ " + str(CIAttrRate)])
         else:
-            rows.append(["Default", avgPayoff, avgAttrRate])
+            rows.append(["Default", str(avgPayoff) + " $\pm$ " + str(CIPayoff), str(avgAttrRate) + " $\pm$ " + str(CIAttrRate)])
 
     # Code inspired by https://colab.research.google.com/drive/1Iq10lHznMngg1-Uoo-QtpTPii1JDYSQA?usp=sharing#scrollTo=K7NNR1Vg40Vo
     table = Texttable()
