@@ -178,3 +178,37 @@ def generateLaTeX(listOfFolders):
     print('\nTexttable Latex:')
     print(latextable.draw_latex(table))
     return
+
+def generateBar(listOfFolders):
+    bars1 = []
+    yer1 = []
+    for folder in listOfFolders:
+        dirList = os.listdir(folder)
+        for file in dirList:
+            with open(file) as file_obj:
+                data = pd.read_csv(file)
+                if file == 'boardStats.csv':
+                    payoffs = data['Percentage Payoff Discovered'].tolist()
+            
+            avgPayoff = sum(payoffs) / len(payoffs)
+            bars1 += [avgPayoff]
+            CIPayoff = avgPayoff - (avgPayoff - 1.96*math.sqrt(np.var(payoffs)/len(payoffs)))
+            yer1 += [CIPayoff]
+
+        # width of the bars
+        barWidth = 0.3
+        # The x position of bars
+        r1 = np.arange(len(bars1))
+        r2 = [x + barWidth for x in r1]
+
+        # Create blue bars
+        plt.bar(r1, bars1, width = barWidth, color = 'blue', edgecolor = 'black', yerr=yer1, capsize=7, label='poacee')
+
+        # general layout
+        plt.xticks([r + barWidth for r in range(len(bars1))], ['cond_A', 'cond_B', 'cond_C'])
+        plt.ylabel('height')
+        plt.legend()
+
+        # Show graphic
+        plt.show()
+        return
