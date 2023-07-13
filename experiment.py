@@ -1,11 +1,11 @@
 import json
 import csv
 import sqlite3
-import latextable
+#import latextable
 import pandas as pd
 import os
-from tabulate import tabulate
-from texttable import Texttable
+#from tabulate import tabulate
+#from texttable import Texttable
 from Run import *
 
 inp = "default.json"
@@ -247,3 +247,92 @@ def generateBar(listOfFolders):
         # Show graphic
         plt.show()
         return
+    
+def generateBarGraph(csv_file, x_tick_labels=None, legend_labels = None):
+    #empty lists to hold the data for each CSV file
+    all_data = []
+    all_averages = []
+    all_variances = []
+
+    #colors for the bars
+    colors = ['blue', 'green', 'purple'] #orange, red
+
+    for csv_file in csv_files:
+        #Read the CSV file
+        df = pd.read_csv(csv_file)
+
+        #Extract the first column (payoff in boardStats)
+        column = df.iloc[:, 0]
+
+        #average and variance of the column
+        average = column.mean()
+        variance = column.var()
+
+        #Append the average and variance to the lists
+        all_averages.append(average)
+        all_variances.append(variance)
+
+        #Append the average to the data list
+        all_data.append(average)
+
+    #create bar graph
+    num_files = len(csv_files)
+    num_bars = num_files // 3
+    x = np.arange(num_bars)
+
+    #width of each bar
+    width = 0.2
+    bar_positions = [x - width + width * i for i in range(3)]
+
+    fig, ax = plt.subplots()
+
+    #Plot the bars
+    for i, position in enumerate(bar_positions):
+        bars = ax.bar(position, all_data[i::3], width=width, yerr=np.sqrt(all_variances[i::3]), capsize=4, color=colors[i], label=f'Bar Group {i+1}')
+
+    #show exact values of each bar(comment out)
+    # for i, position in enumerate(bar_positions):
+    #     for j, val in enumerate(all_data[i::3]):
+    #         ax.text(position[j], val, str(val), ha='center', va='bottom')
+
+    #Remove x-axis ticks
+    ax.tick_params(axis='x', which='both', bottom=False, top=False)
+
+    #Set the x-axis ticks and labels
+    if x_tick_labels:
+        assert len(x_tick_labels) == num_bars, "Number of x tick labels must match the number of bars."
+        ax.set_xticks(x)
+        ax.set_xticklabels(x_tick_labels)
+    else:
+        ax.set_xticks(x)
+        ax.set_xticklabels(['Group {}'.format(i + 1) for i in range(num_bars)])
+
+    #x-axis label
+    ax.set_xlabel('Scientist Incentives')
+
+    #y-axis label
+    ax.set_ylabel('Average Payoff')
+
+    #legend
+    if legend_labels:
+        assert len(legend_labels) == 3, "Number of legend labels must match the number of bar groups (3)."
+        handles, _ = ax.get_legend_handles_labels()
+        ax.legend(handles, legend_labels)
+
+    #Display the graph
+    plt.show()
+
+
+#calling generateBarGraph function example
+
+#note: csv file has to be in the python directory
+# csv_files = ['CIT1boardStats(5).csv', 'CIT1boardStats(10).csv', 'CIT1boardStats(32).csv']
+
+#create the labels on the x axis for every 3 graphs
+# x_tick_labels = ['citation 1']
+
+#create the lengend labels
+# legend_labels = ['5x5','10x10', '32x32']
+
+#plot
+# generateBarGraph(csv_files, x_tick_labels, legend_labels)
