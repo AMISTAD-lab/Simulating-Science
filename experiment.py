@@ -1,11 +1,12 @@
 import json
 import csv
 import sqlite3
-#import latextable
+import latextable
 import pandas as pd
 import os
-#from tabulate import tabulate
-#from texttable import Texttable
+import statistics
+from tabulate import tabulate
+from texttable import Texttable
 from Run import *
 
 csv_files = []
@@ -134,6 +135,51 @@ def experiment(numScientists, numRuns, numExperiments, boardDimension):
             writer.writerows(l)
 
     conn.close()
+    return
+
+def plot_confidence_interval(x, values, z=1.96, color='#2187bb', horizontal_line_width=0.25):
+   mean = statistics.mean(values)
+   stdev = statistics.stdev(values)
+   confidence_interval = z * stdev / math.sqrt(len(values))
+
+
+   left = x - horizontal_line_width / 2
+   top = mean - confidence_interval
+   right = x + horizontal_line_width / 2
+   bottom = mean + confidence_interval
+   plt.plot([x, x], [top, bottom], color=color)
+   plt.plot([left, right], [top, top], color=color)
+   plt.plot([left, right], [bottom, bottom], color=color)
+   plt.plot(x, mean, 'o', color='#f44336')
+
+
+   return mean, confidence_interval
+
+def generateLineGraph(listOfFolders):
+    payoffs = []
+    for folder in listOfFolders:
+        dirList = os.listdir(folder)
+        for file in dirList:
+            with open(str(folder) + "/" + str(file)) as file_obj:
+                data = pd.read_csv(str(folder) + "/" + str(file))
+                if file == 'cellStats.csv':
+                    inputStr = data['Input'].tolist()
+                    cellPayoff = data['Payoff Extracted'].tolist()
+                    cellFund = data['Funds'].tolist()
+                elif file == 'boardStats.csv':
+                    payoffs.append(data['Percentage Payoff Discovered'].tolist())
+                    attrRate = data['Attrition Rate'].tolist()
+                elif file == 'sciStats.csv':
+                    sciFund = data['Total Funding Accumulated'].tolist()
+                    sciCitCount = data['Citation Count'].tolist()
+    plt.xticks([1, 2, 3, 4, 5], ['0.2', '0.4', '0.6', '0.8', '1'])
+    plt.title('Payoffs')
+    plot_confidence_interval(1, payoffs[0])
+    plot_confidence_interval(2, payoffs[1])
+    plot_confidence_interval(3, payoffs[2])
+    plot_confidence_interval(4, payoffs[3])
+    plot_confidence_interval(5, payoffs[4])
+    plt.show()
     return
     
 def generateLaTeX(listOfFolders):
