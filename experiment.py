@@ -139,11 +139,6 @@ def generateLaTeX(listOfFolders):
     Outputs LaTeX code to generate tables with simulation statistics.
     Takes in a list of csv file names within folders in the repository.
     """
-    payoffs = []
-    attrRate = []
-    inputStr = []
-    cellPayoff = []
-    cellFund = []
     boardRows = [['Input', 'Average Percentage of Payoff Discovered', 'Average Attrition Rate']]
     cellRows = [['Input', 'Average Difference between Funding and Payoff Extracted']]
     sciRows = [['Input', 'Average Difference between Funding and Citation Count']]
