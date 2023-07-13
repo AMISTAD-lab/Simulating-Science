@@ -139,44 +139,84 @@ def generateLaTeX(listOfFolders):
     Outputs LaTeX code to generate tables with simulation statistics.
     Takes in a list of csv file names within folders in the repository.
     """
-    rows = [['Input', 'Average Percentage of Payoff Discovered', 'Average Attrition Rate']]
+    payoffs = []
+    attrRate = []
+    inputStr = []
+    cellPayoff = []
+    cellFund = []
+    boardRows = [['Input', 'Average Percentage of Payoff Discovered', 'Average Attrition Rate']]
+    cellRows = [['Input', 'Average Difference between Funding and Payoff Extracted']]
+    sciRows = [['Input', 'Average Difference between Funding and Citation Count']]
     for folder in listOfFolders:
         dirList = os.listdir(folder)
         for file in dirList:
-            with open(file) as file_obj:
-                data = pd.read_csv(file)
+            with open(str(folder) + "/" + str(file)) as file_obj:
+                data = pd.read_csv(str(folder) + "/" + str(file))
                 if file == 'cellStats.csv':
                     inputStr = data['Input'].tolist()
+                    cellPayoff = data['Payoff Extracted'].tolist() 
+                    cellFund = data['Funds'].tolist()
                 elif file == 'boardStats.csv':
                     payoffs = data['Percentage Payoff Discovered'].tolist()
                     attrRate = data['Attrition Rate'].tolist()
+                elif file == 'sciStats.csv':
+                    sciFund = data['Total Funding Accumulated'].tolist()
+                    sciCitCount = data['Citation Count'].tolist()
+        citCountToFund = [abs(sciFund[i] - sciCitCount[i]) for i in range(len(sciFund))]
+        avgCitCountToFund = sum(citCountToFund) / len(citCountToFund)
+        CIavgCitCountToFund = avgCitCountToFund - (avgCitCountToFund - 1.96*math.sqrt(np.var(citCountToFund)/len(citCountToFund)))
+
+        payoffToFund = [abs(cellPayoff[i] - cellFund[i]) for i in range(len(cellPayoff))]
+        avgPayoffToFund = sum(payoffToFund) / len(payoffToFund)
+        CIavgPayoffToFund = avgPayoffToFund - (avgPayoffToFund - 1.96*math.sqrt(np.var(payoffToFund)/len(payoffToFund)))
+
         avgPayoff = sum(payoffs) / len(payoffs)
         CIPayoff = avgPayoff - (avgPayoff - 1.96*math.sqrt(np.var(payoffs)/len(payoffs)))
 
         avgAttrRate = sum(attrRate) / len(attrRate)
         CIAttrRate = avgAttrRate - (avgAttrRate - 1.96*math.sqrt(np.var(attrRate)/len(attrRate)))
         if type(inputStr[0]) == str:
-            rows.append([inputStr[0], str(avgPayoff) + " $\pm$ " + str(CIPayoff), str(avgAttrRate) + " $\pm$ " + str(CIAttrRate)])
+            boardRows.append([inputStr[0],
+                str(f'{avgPayoff:0.3f}') + " $\pm$ " + str(f'{CIPayoff:0.3f}'),
+                str(f'{avgAttrRate:0.3f}') + " $\pm$ " + str(f'{CIAttrRate:0.3f}')])
+            cellRows.append([inputStr[0],
+                str(f'{avgPayoffToFund:0.3f}') + " $\pm$ " + str(f'{CIavgPayoffToFund:0.3f}')])
+            sciRows.append([inputStr[0],
+                str(f'{avgCitCountToFund:0.3f}') + " $\pm$ " + str(f'{CIavgCitCountToFund:0.3f}')])
         else:
-            rows.append(["Default", str(avgPayoff) + " $\pm$ " + str(CIPayoff), str(avgAttrRate) + " $\pm$ " + str(CIAttrRate)])
+            boardRows.append(["Default",
+                str(f'{avgPayoff:0.3f}') + " $\pm$ " + str(f'{CIPayoff:0.3f}'),
+                str(f'{avgAttrRate:0.3f}') + " $\pm$ " + str(f'{CIAttrRate:0.3f}')])
+            cellRows.append(["Default",
+                str(f'{avgPayoffToFund:0.3f}') + " $\pm$ " + str(f'{CIavgPayoffToFund:0.3f}')])
+            sciRows.append(["Default",
+                str(f'{avgCitCountToFund:0.3f}') + " $\pm$ " + str(f'{CIavgCitCountToFund:0.3f}')])
 
     # Code inspired by https://colab.research.google.com/drive/1Iq10lHznMngg1-Uoo-QtpTPii1JDYSQA?usp=sharing#scrollTo=K7NNR1Vg40Vo
     table = Texttable()
     table.set_cols_align(["c"] * 3)
     table.set_deco(Texttable.HEADER | Texttable.VLINES)
-    table.add_rows(rows)
+    table.add_rows(boardRows)
 
-    # print('Tabulate Table:')
-    # print(tabulate(rows, headers='firstrow'))
-
-    # print('\nTexttable Table:')
-    # print(table.draw())
-
-    print('\nTabulate Latex:')
-    print(tabulate(rows, headers='firstrow', tablefmt='latex'))
-
-    print('\nTexttable Latex:')
+    tabulate(boardRows, headers='firstrow', tablefmt='latex')
     print(latextable.draw_latex(table))
+
+    table = Texttable()
+    table.set_cols_align(["c"] * 2)
+    table.set_deco(Texttable.HEADER | Texttable.VLINES)
+    table.add_rows(cellRows)
+
+    tabulate(cellRows, headers='firstrow', tablefmt='latex')
+    print(latextable.draw_latex(table))
+
+    table = Texttable()
+    table.set_cols_align(["c"] * 2)
+    table.set_deco(Texttable.HEADER | Texttable.VLINES)
+    table.add_rows(sciRows)
+
+    tabulate(sciRows, headers='firstrow', tablefmt='latex')
+    print(latextable.draw_latex(table))
+
     return
 
 def generateBar(listOfFolders):
