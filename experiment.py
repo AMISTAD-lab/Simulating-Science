@@ -8,6 +8,8 @@ import os
 #from texttable import Texttable
 from Run import *
 
+csv_files = []
+
 inp = "default.json"
 with open(inp, "r") as params:
     data = json.load(params)
@@ -213,40 +215,6 @@ def generateLaTeX(listOfFolders):
     print(latextable.draw_latex(table))
 
     return
-
-def generateBar(listOfFolders):
-    bars1 = []
-    yer1 = []
-    for folder in listOfFolders:
-        dirList = os.listdir(folder)
-        for file in dirList:
-            with open(file) as file_obj:
-                data = pd.read_csv(file)
-                if file == 'boardStats.csv':
-                    payoffs = data['Percentage Payoff Discovered'].tolist()
-            
-            avgPayoff = sum(payoffs) / len(payoffs)
-            bars1 += [avgPayoff]
-            CIPayoff = avgPayoff - (avgPayoff - 1.96*math.sqrt(np.var(payoffs)/len(payoffs)))
-            yer1 += [CIPayoff]
-
-        # width of the bars
-        barWidth = 0.3
-        # The x position of bars
-        r1 = np.arange(len(bars1))
-        r2 = [x + barWidth for x in r1]
-
-        # Create blue bars
-        plt.bar(r1, bars1, width = barWidth, color = 'blue', edgecolor = 'black', yerr=yer1, capsize=7, label='poacee')
-
-        # general layout
-        plt.xticks([r + barWidth for r in range(len(bars1))], ['cond_A', 'cond_B', 'cond_C'])
-        plt.ylabel('height')
-        plt.legend()
-
-        # Show graphic
-        plt.show()
-        return
     
 def generateBarGraph(csv_file, x_tick_labels=None, legend_labels = None):
     #empty lists to hold the data for each CSV file
@@ -322,17 +290,33 @@ def generateBarGraph(csv_file, x_tick_labels=None, legend_labels = None):
     #Display the graph
     plt.show()
 
+def callBarGraph():
+    x_tick_labels = []
+    legend_labels = []
 
-#calling generateBarGraph function example
+    condition = True
+    print("input csv files")
+    while condition:
+        userFiles = str(input())
+        if userFiles == '':
+            condition2 = True
+            print("input x labels")
+            while condition2:
+                userXLabels = str(input())
+                if userXLabels == '':
+                    condition3 = True
+                    print("input legend labels")
+                    while condition3:
+                        userLegend = str(input())
+                        if userLegend == '':
+                            condition3 = False
+                            condition2 = False
+                            condition = False
+                        else:
+                            legend_labels.append(userLegend)
+                else:
+                    x_tick_labels.append(userXLabels)
+        else:
+            csv_files.append(userFiles)
 
-#note: csv file has to be in the python directory
-# csv_files = ['CIT1boardStats(5).csv', 'CIT1boardStats(10).csv', 'CIT1boardStats(32).csv']
-
-#create the labels on the x axis for every 3 graphs
-# x_tick_labels = ['citation 1']
-
-#create the lengend labels
-# legend_labels = ['5x5','10x10', '32x32']
-
-#plot
-# generateBarGraph(csv_files, x_tick_labels, legend_labels)
+    generateBarGraph(csv_files, x_tick_labels, legend_labels)
