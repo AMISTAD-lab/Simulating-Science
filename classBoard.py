@@ -89,6 +89,7 @@ class Board():
         # Calculate the probabilities for each cell
         probabilities = np.random.rand(self.rows, self.cols)
         denominator = 0
+        total = self.rows * self.cols * funding["fundsPerCell"]
         for x in range(self.rows):
             for y in range(self.cols):
                 cell = self.board[x][y]
@@ -122,8 +123,8 @@ class Board():
                 for j in range(len(probabilities[0])):
                     #fund cell and then scientist based on probabilities
                     cell = self.board[i][j]
-                    cell.funds = probabilities[i][j] * funding["total"]
-                    cell.totalFunds += probabilities[i][j] * funding["total"]
+                    cell.funds = probabilities[i][j] * total
+                    cell.totalFunds += probabilities[i][j] * total
                     if cell.location in self.cellsHit.keys():
                         self.distributeFundingSci(exp, self.cellsHit[cell.location], cell.funds, starFactorWeights)
             return probabilities
@@ -155,8 +156,8 @@ class Board():
                 probabilities[j][k] = numerator / denominator
 
                 #fund cell and then scientist based on probabilities
-                cell.funds = probabilities[j][k] * funding["total"]
-                cell.totalFunds += probabilities[j][k] * funding["total"]
+                cell.funds = probabilities[j][k] * total
+                cell.totalFunds += probabilities[j][k] * total
                 if cell.location in self.cellsHit.keys():
                     self.distributeFundingSci(exp, self.cellsHit[cell.location], cell.funds, starFactorWeights)
         return probabilities

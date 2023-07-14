@@ -3,7 +3,7 @@
     {"citation" : 0, "payoff" : 0, "exploration" : 0, "funding" : 0},
 
     "fund" : 
-    {"total" : 100, "decrease" : 1, "minimum" : 10},
+    {"fundsPerCell" : 10, "decrease" : 1, "minimum" : 10},
 
     "fundFactors" : 
     {"visPayoff" : 0, "starFactor" : 0, "totalHits" : 0, "recentHits" : 0},

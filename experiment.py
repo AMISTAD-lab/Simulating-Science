@@ -186,11 +186,16 @@ def generateLaTeX(listOfFolders):
     """
     Outputs LaTeX code to generate tables with simulation statistics.
     Takes in a list of csv file names within folders in the repository.
+    Enter in the default parameters file first, as a point of reference for the
+    other statistics. 
     """
-    boardRows = [['Input', 'Average Percentage of Payoff Discovered', 'Average Attrition Rate']]
-    cellRows = [['Input', 'Average Difference between Funding and Payoff Extracted']]
-    sciRows = [['Input', 'Average Difference between Funding and Citation Count']]
-    for folder in listOfFolders:
+    boardRows = [['\\textbf{Input}', '\\textbf{Percentage of Payoff Discovered}', '\\textbf{Attrition Rate}']]
+    cellRows = [['\\textbf{Input}', '\\textbf{Difference between Funding and Payoff Extracted : Default}']]
+    sciRows = [['\\textbf{Input}', '\\textbf{Difference between Funding and Citation Count : Default}']]
+    defaultVals = {"avgPayoffToFund" : 1, "CIavgPayoffToFund" : 1,
+                        "avgCitCountToFund" : 1, "CIavgCitCountToFund" : 1}
+    for i in range(len(listOfFolders)):
+        folder = listOfFolders[i]
         dirList = os.listdir(folder)
         for file in dirList:
             with open(str(folder) + "/" + str(file)) as file_obj:
@@ -218,22 +223,23 @@ def generateLaTeX(listOfFolders):
 
         avgAttrRate = sum(attrRate) / len(attrRate)
         CIAttrRate = avgAttrRate - (avgAttrRate - 1.96*math.sqrt(np.var(attrRate)/len(attrRate)))
+
+        if i == 0:
+            defaultVals = {"avgPayoffToFund" : avgPayoffToFund, "CIavgPayoffToFund" : CIavgPayoffToFund,
+                            "avgCitCountToFund" : avgCitCountToFund, "CIavgCitCountToFund" : CIavgCitCountToFund}
+
         if type(inputStr[0]) == str:
             boardRows.append([inputStr[0],
-                str(f'{avgPayoff:0.3f}') + " $\pm$ " + str(f'{CIPayoff:0.3f}'),
-                str(f'{avgAttrRate:0.3f}') + " $\pm$ " + str(f'{CIAttrRate:0.3f}')])
+                str(f'{avgPayoff:0.3f}') + "\hphantom{7} $\pm$ " + str(f'{CIPayoff:0.3f}'),
+                str(f'{avgAttrRate:0.3f}') + "\hphantom{7} $\pm$ " + str(f'{CIAttrRate:0.3f}')])
             cellRows.append([inputStr[0],
-                str(f'{avgPayoffToFund:0.3f}') + " $\pm$ " + str(f'{CIavgPayoffToFund:0.3f}')])
+                str(f'{avgPayoffToFund / defaultVals["avgPayoffToFund"]:0.3f}')])
             sciRows.append([inputStr[0],
-                str(f'{avgCitCountToFund:0.3f}') + " $\pm$ " + str(f'{CIavgCitCountToFund:0.3f}')])
+                str(f'{avgCitCountToFund / defaultVals["avgCitCountToFund"]:0.3f}')])
         else:
-            boardRows.append(["Default",
-                str(f'{avgPayoff:0.3f}') + " $\pm$ " + str(f'{CIPayoff:0.3f}'),
-                str(f'{avgAttrRate:0.3f}') + " $\pm$ " + str(f'{CIAttrRate:0.3f}')])
-            cellRows.append(["Default",
-                str(f'{avgPayoffToFund:0.3f}') + " $\pm$ " + str(f'{CIavgPayoffToFund:0.3f}')])
-            sciRows.append(["Default",
-                str(f'{avgCitCountToFund:0.3f}') + " $\pm$ " + str(f'{CIavgCitCountToFund:0.3f}')])
+            boardRows.append(["Default (uniformly weighted)",
+                str(f'{avgPayoff:0.3f}') + "\hphantom{7} $\pm$ " + str(f'{CIPayoff:0.3f}'),
+                str(f'{avgAttrRate:0.3f}') + "\hphantom{7} $\pm$ " + str(f'{CIAttrRate:0.3f}')])
 
     # Code inspired by https://colab.research.google.com/drive/1Iq10lHznMngg1-Uoo-QtpTPii1JDYSQA?usp=sharing#scrollTo=K7NNR1Vg40Vo
     table = Texttable()
@@ -296,6 +302,7 @@ def generateBarGraph(csv_file, x_tick_labels=None, legend_labels = None):
 
     #width of each bar
     width = 0.2
+    #bar_positions = [x - width/2, x + width/2]
     bar_positions = [x - width + width * i for i in range(3)]
 
     fig, ax = plt.subplots()
