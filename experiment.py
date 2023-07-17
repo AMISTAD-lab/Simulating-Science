@@ -164,12 +164,21 @@ def generateLineGraph(listOfFolders):
                 data = pd.read_csv(str(folder) + "/" + str(file))
                 if file == 'boardStats.csv':
                     payoffs.append(data['Percentage Payoff Discovered'].tolist())
-    plt.xticks([1, 2, 3, 4], ['0.2', '0.4', '0.6', '0.8'])
+    plt.xticks([1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+        ['0.0', '0.1', '0.2', '0.3', '0.4', '0.5', '0.6', '0.7', '0.8', '0.9'])
     plt.title('Payoffs')
     plot_confidence_interval(1, payoffs[0])
     plot_confidence_interval(2, payoffs[1])
     plot_confidence_interval(3, payoffs[2])
     plot_confidence_interval(4, payoffs[3])
+    plot_confidence_interval(5, payoffs[4])
+    plot_confidence_interval(6, payoffs[5])
+    plot_confidence_interval(7, payoffs[6])
+    plot_confidence_interval(8, payoffs[7])
+    plot_confidence_interval(9, payoffs[8])
+    plot_confidence_interval(10, payoffs[9])
+    # plot_confidence_interval(11, payoffs[10])
+
     plt.show()
     return
     
@@ -181,8 +190,10 @@ def generateLaTeX(listOfFolders):
     other statistics. 
     """
     boardRows = [['\\textbf{Input}', '\\textbf{Percentage of Payoff Discovered}', '\\textbf{Attrition Rate}']]
-    cellRows = [['\\textbf{Input}', '\\textbf{Difference between Funding and Payoff Extracted : Default}']]
-    sciRows = [['\\textbf{Input}', '\\textbf{Difference between Funding and Citation Count : Default}']]
+    # cellRows = [['\\textbf{Input}', '\\textbf{Difference between Funding and Payoff Extracted : Default}']]
+    # sciRows = [['\\textbf{Input}', '\\textbf{Difference between Funding and Citation Count : Default}']]
+    cellRows = [['\\textbf{Input}', '\\textbf{Average Difference}', '\\textbf{Difference Ratio}']]
+    sciRows = [['\\textbf{Input}', '\\textbf{Average Difference}', '\\textbf{Difference Ratio}']]
     defaultVals = {"avgPayoffToFund" : 1, "CIavgPayoffToFund" : 1,
                         "avgCitCountToFund" : 1, "CIavgCitCountToFund" : 1}
     for i in range(len(listOfFolders)):
@@ -224,13 +235,21 @@ def generateLaTeX(listOfFolders):
                 str(f'{avgPayoff:0.3f}') + "\hphantom{7} $\pm$ " + str(f'{CIPayoff:0.3f}'),
                 str(f'{avgAttrRate:0.3f}') + "\hphantom{7} $\pm$ " + str(f'{CIAttrRate:0.3f}')])
             cellRows.append([inputStr[0],
+                str(f'{avgPayoffToFund:0.3f}') + "\hphantom{7} $\pm$ " + str(f'{CIavgPayoffToFund:0.3f}'),
                 str(f'{avgPayoffToFund / defaultVals["avgPayoffToFund"]:0.3f}')])
             sciRows.append([inputStr[0],
+                str(f'{avgCitCountToFund:0.3f}') + "\hphantom{7} $\pm$ " + str(f'{CIavgCitCountToFund:0.3f}'),
                 str(f'{avgCitCountToFund / defaultVals["avgCitCountToFund"]:0.3f}')])
         else:
             boardRows.append(["Default (uniformly weighted)",
                 str(f'{avgPayoff:0.3f}') + "\hphantom{7} $\pm$ " + str(f'{CIPayoff:0.3f}'),
                 str(f'{avgAttrRate:0.3f}') + "\hphantom{7} $\pm$ " + str(f'{CIAttrRate:0.3f}')])
+            cellRows.append(["Default (uniformly weighted)",
+                str(f'{avgPayoffToFund:0.3f}') + "\hphantom{7} $\pm$ " + str(f'{CIavgPayoffToFund:0.3f}'),
+                str(f'{avgPayoffToFund / defaultVals["avgPayoffToFund"]:0.3f}')])
+            sciRows.append(["Default (uniformly weighted)",
+                str(f'{avgCitCountToFund:0.3f}') + "\hphantom{7} $\pm$ " + str(f'{CIavgCitCountToFund:0.3f}'),
+                str(f'{avgCitCountToFund / defaultVals["avgCitCountToFund"]:0.3f}')])
 
     # Code inspired by https://colab.research.google.com/drive/1Iq10lHznMngg1-Uoo-QtpTPii1JDYSQA?usp=sharing#scrollTo=K7NNR1Vg40Vo
     table = Texttable()
@@ -242,7 +261,7 @@ def generateLaTeX(listOfFolders):
     print(latextable.draw_latex(table))
 
     table = Texttable()
-    table.set_cols_align(["c"] * 2)
+    table.set_cols_align(["c"] * 3)
     table.set_deco(Texttable.HEADER | Texttable.VLINES)
     table.add_rows(cellRows)
 
@@ -250,7 +269,7 @@ def generateLaTeX(listOfFolders):
     print(latextable.draw_latex(table))
 
     table = Texttable()
-    table.set_cols_align(["c"] * 2)
+    table.set_cols_align(["c"] * 3)
     table.set_deco(Texttable.HEADER | Texttable.VLINES)
     table.add_rows(sciRows)
 
