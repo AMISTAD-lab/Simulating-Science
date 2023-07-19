@@ -164,9 +164,10 @@ def generateLineGraph(listOfFolders):
                 data = pd.read_csv(str(folder) + "/" + str(file))
                 if file == 'boardStats.csv':
                     payoffs.append(data['Percentage Payoff Discovered'].tolist())
-    plt.xticks([1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
-        ['0.0', '0.1', '0.2', '0.3', '0.4', '0.5', '0.6', '0.7', '0.8', '0.9'])
-    plt.title('Payoffs')
+    plt.xticks([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
+        ['0.0', '0.1', '0.2', '0.3', '0.4', '0.5', '0.6', '0.7', '0.8', '0.9', '1.0'])
+    plt.xlabel('Parameter Weight')
+    plt.ylabel('Average Percentage Payoff Discovered')
     plot_confidence_interval(1, payoffs[0])
     plot_confidence_interval(2, payoffs[1])
     plot_confidence_interval(3, payoffs[2])
@@ -177,7 +178,7 @@ def generateLineGraph(listOfFolders):
     plot_confidence_interval(8, payoffs[7])
     plot_confidence_interval(9, payoffs[8])
     plot_confidence_interval(10, payoffs[9])
-    # plot_confidence_interval(11, payoffs[10])
+    plot_confidence_interval(11, payoffs[10])
 
     plt.show()
     return
