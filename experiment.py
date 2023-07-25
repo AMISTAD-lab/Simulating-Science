@@ -31,32 +31,43 @@ conn.execute('''CREATE TABLE IF NOT EXISTS bStats (
 conn.execute('''CREATE TABLE IF NOT EXISTS cStats (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
                     inputStr STRING,
-                    numRun INTEGER,
+                    numExperiment INTEGER,
+                    timeStep INTEGER,
                     location STRING,
-                    funds FLOAT,
-                    payoffExtracted FLOAT
+                    totalFunds FLOAT,
+                    totalPayoffExtracted FLOAT,
+                    numQueries INTEGER,
+                    uniqIds STRING
                 )''')
 
 conn.execute('''CREATE TABLE IF NOT EXISTS sStats (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
                     inputStr STRING,
-                    numRun INTEGER,
+                    numExperiment INTEGER,
+                    timeStep INTEGER,
                     uniqId INTEGER,
-                    funds FLOAT,
+                    totalFunds FLOAT,
                     starFactor FLOAT,
-                    citations INTEGER
+                    totalCitations INTEGER,
+                    totalImpact FLOAT,
+                    cellQueried STRING
                 )''')
 
 conn.execute('''CREATE TABLE IF NOT EXISTS runStats (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
                     inputStrSci STRING,
-                    numRunSci INTEGER,
+                    numExpSci INTEGER,
+                    timeStepSci INTEGER,
                     inputStrCell STRING,
-                    numRunCell INTEGER,
+                    numExpCell INTEGER,
+                    timeStepCell INTEGER,
+                    numCellsHit INTEGER,
                     FOREIGN KEY (inputStrSci) REFERENCES sStats(inputStr),
-                    FOREIGN KEY (numRunSci) REFERENCES sStats(numRun),
+                    FOREIGN KEY (numExpSci) REFERENCES sStats(numExperiment),
+                    FOREIGN KEY (timeStepSci) REFERENCES sStats(timeStep),
                     FOREIGN KEY (inputStrCell) REFERENCES cStats(inputStr),
-                    FOREIGN KEY (numRunCell) REFERENCES cStats(numRun)
+                    FOREIGN KEY (numExpCell) REFERENCES cStats(numExperiment),
+                    FOREIGN KEY (timeStepCell) REFERENCES cStats(timeStep)
                 )''')
 conn.commit()
 
@@ -101,9 +112,10 @@ def experiment(numScientists, numRuns, numExperiments, boardDimension):
     bStats = []
     cStats = []
     sStats = []
+    currentScientist = 0
     for x in range(numExperiments):
         board = Board(boardDimension, boardDimension, probZero, N, D, p)
-        batchResult = batchRun(board, numScientists, numRuns, data, fullInput)
+        currentScientist, batchResult = batchRun(board, numScientists, numRuns, data, fullInput, x+1, currentScientist)
         bStats.append(batchResult[0])
         cStats.append(batchResult[1])
         sStats.append(batchResult[2])

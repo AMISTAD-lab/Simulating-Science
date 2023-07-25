@@ -1,5 +1,6 @@
 import numpy as np
 import sqlite3
+import copy
 from PIL import Image
 from classCell import *
 from classBoard import *
@@ -8,7 +9,7 @@ from classScientist import *
 # setting up sql database connection
 conn = sqlite3.connect('data.db')
 
-def oneRun(board, cellsHit, numRun, starFactorWeights, dept, exp, numRuns, inputStr):
+def oneRun(board, cellsHit, numRun, starFactorWeights, dept, exp, inputStr, numExperiment):
     """runs query simulation for one year"""
     for key, val in cellsHit.items():
         #more than one scientist
@@ -18,25 +19,36 @@ def oneRun(board, cellsHit, numRun, starFactorWeights, dept, exp, numRuns, input
             for scientist in sciOrder:
                 scientist.sciQuery(key, board)
                 scientist.cite(val, starFactorWeights, exp)
+                scientist.cellQueried = str(key)
         else:
             val[0].sciQuery(key, board)
+            val[0].cellQueried = str(key)
     board.updateNumSciHits()
 
     for i in range(board.rows*board.cols):
-        insert_query = "INSERT INTO cStats (inputStr, numRun, location, funds, payoffExtracted) VALUES (?, ?, ?, ?, ?)"
+        insert_query = "INSERT INTO cStats (inputStr, numExperiment, timeStep, location, totalFunds, totalPayoffExtracted, numQueries, uniqIds) VALUES (?, ?, ?, ?, ?, ?, ?, ?)"
         l = board.flatten(board.board)
-        values = (inputStr, numRun, str(l[i].location), l[i].funds, board.getVisPayoff(l[i].location))
+        if l[i].location in cellsHit.keys():
+            numQueries = len(cellsHit[l[i].location])
+            uniqIds = []
+            for sci in cellsHit[l[i].location]:
+                uniqIds.append(sci.id)
+            uniqIds = str(uniqIds)
+        else:
+            numQueries = 0
+            uniqIds = ""
+        values = (inputStr, numExperiment, numRun, str(l[i].location), l[i].funds, float(board.getVisPayoff(l[i].location)), numQueries, uniqIds)
         conn.execute(insert_query, values)
         conn.commit()
 
     for i in range(len(dept)):
-        insert_query = "INSERT INTO sStats (inputStr, numRun, uniqId, funds, starFactor, citations) VALUES (?, ?, ?, ?, ?, ?)"
-        values = (inputStr, numRun, dept[i].id, dept[i].funding, dept[i].getStarFactor(starFactorWeights), dept[i].citcount)
+        insert_query = "INSERT INTO sStats (inputStr, numExperiment, timeStep, uniqId, totalFunds, starFactor, totalCitations, totalImpact, cellQueried) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)"
+        values = (inputStr, numExperiment, numRun, dept[i].id, dept[i].funding, dept[i].getStarFactor(starFactorWeights), dept[i].citcount, float(dept[i].impact), dept[i].cellQueried)
         conn.execute(insert_query, values)
         conn.commit()
     
-    insert_query = "INSERT INTO runStats (inputStrSci, numRunSci, inputStrCell, numRunCell) VALUES (?, ?, ?, ?)"
-    values = (inputStr, numRun, inputStr, numRun)
+    insert_query = "INSERT INTO runStats (inputStrSci, numExpSci, timeStepSci, inputStrCell, numExpCell, timeStepCell, numCellsHit) VALUES (?, ?, ?, ?, ?, ?, ?)"
+    values = (inputStr, numExperiment, numRun, inputStr, numExperiment, numRun, len(cellsHit))
     conn.execute(insert_query, values)
     conn.commit()
 
@@ -44,7 +56,7 @@ def oneRun(board, cellsHit, numRun, starFactorWeights, dept, exp, numRuns, input
     #board.drawBoard(cellsHit, numRun, starFactorWeights)
     return board
 
-def batchRun(board, numScientists, numRuns, data, input):
+def batchRun(board, numScientists, numRuns, data, input, numExperiment, currentScientist):
     """
     Runs the simulation for each of numRuns years.
     During each run, each scientist in the department queries the board.
@@ -57,10 +69,13 @@ def batchRun(board, numScientists, numRuns, data, input):
     exp = data["exp"]["num"]
     starFactorWeights = data["star"]
     totalScientists = numScientists
+    totalDept = []
 
-    dept = [Scientist(i) for i in range(numScientists)]
+    dept = [Scientist(i) for i in range(currentScientist, currentScientist + numScientists)]
     attrition = 0
     for j in range(numRuns):
+        oldDept = copy.copy(dept)
+        totalDept = copy.copy(dept)
         # keep track of which cells the scientists are hitting to check overlap
         # funding for the first year is determined randomly
         board.distributeFundingCell(chooseCellToFund, funding, exp, starFactorWeights)
@@ -76,7 +91,8 @@ def batchRun(board, numScientists, numRuns, data, input):
                 board.cellsHit[location].append(scientist)
             else:
                 board.cellsHit.update({location : [scientist]})
-            # when one scientist ends their career, another is introduced
+            
+            # scientists leaving science
             if (scientist.career == 0) or (scientist.funding <= funding["minimum"]):
                 # attrition is the number of scientists who left science due to lack of funding
                 if (scientist.funding <= funding["minimum"]):
@@ -84,11 +100,14 @@ def batchRun(board, numScientists, numRuns, data, input):
                 # record the data of scientists who left science
                 board.sStats.append([input, scientist.id, scientist.funding,
                     scientist.getStarFactor(starFactorWeights), scientist.citcount])
-                dept.remove(scientist)
-                dept.append(Scientist(totalScientists))
+                
+                #replace the old scientist's spot with a new scientist
+                newScientist = Scientist(totalScientists+currentScientist)
+                dept[idx] = newScientist
+                totalDept.append(newScientist)
                 totalScientists += 1
-        oneRun(board, board.cellsHit, j+1, starFactorWeights, dept, exp, numRuns, input)
-        # print("Board with payoff values: ", oneRun(board, board.cellsHit, j+1, starFactorWeights, dept, exp, numRuns, input))
+        oneRun(board, board.cellsHit, j+1, starFactorWeights, totalDept, exp, input, numExperiment)
+        # print("Board with payoff values: ", oneRun(board, board.cellsHit, j+1, starFactorWeights, totalDept, exp, input))
         # print()
 
     currTotal = sum(board.flatten(board.getPayoffs()))
@@ -103,7 +122,7 @@ def batchRun(board, numScientists, numRuns, data, input):
     #         save_all=True, duration=500, loop=0)
 
     # add the scientist stats from the rest of the scientists at the very end
-    for scientist in dept:
+    for scientist in oldDept:
         board.sStats.append([input, scientist.id, scientist.funding,
             scientist.getStarFactor(starFactorWeights), scientist.citcount])
 
@@ -117,5 +136,4 @@ def batchRun(board, numScientists, numRuns, data, input):
                 cell = board.board[x][y]
                 board.cStats.append([input, cell.location, cell.totalFunds, board.getVisPayoff(cell.location)])
 
-    return [board.bStats, board.cStats, board.sStats]
-
+    return (currentScientist+totalScientists), [board.bStats, board.cStats, board.sStats]

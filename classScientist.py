@@ -11,10 +11,11 @@ class Scientist():
         self.citcount = abs(np.random.randint(20 - self.career, 35 - self.career)) + 1
         self.funding = abs(np.random.randint(20 - self.career, 35 - self.career)) + 1
         self.id = id
+        self.cellQueried = ""
 
     def __repr__(self):
         """String representation of Scientist"""
-        return str([self.impact, self.career, self.citcount, self.funding])
+        return str([self.id, self.impact, self.career, self.citcount, self.funding])
 
     def getStarFactor(self, starFactorWeights):
         """calculates starFactor based on scientist's parameters"""
