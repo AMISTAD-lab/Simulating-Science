@@ -23,7 +23,7 @@ class Cell():
         """
         model payoff extraction for each cell as a randomized logistic function
         """
-        # boolean for whether we have found the lowerx and upperx
+        # boolean for whether we have found the lowerx and upperx of the logistic function
         lowSuccess = False
         highSuccess  = False
 
@@ -36,6 +36,8 @@ class Cell():
             upperx = []
             lowSuccess = False
             highSuccess = False
+
+            # finds upperx and lowerx of the lgoistic function
             for x in np.arange(0, 50, 0.01):
                 y = float(1/(1 + math.pow(math.e, -steepness*(x-center))))
                 # creates a boundary 0.1 above 0 and below 1 for y-val to set as upperx and lowerx

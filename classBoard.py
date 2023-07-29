@@ -7,15 +7,18 @@ class Board():
     def __init__(self, rows, cols, probzero, N, D, p):
         self.rows = rows
         self.cols = cols
+
+        # probability that the cells will contain zero payoff
         self.probzero = probzero
 
         #Max payoff value
         self.rangeVal = 30
+
         #adds # of desired zeros
         self.probzero = math.ceil(self.rangeVal/(1-self.probzero)) - self.rangeVal
         self.randomRange = [0 for i in range(self.probzero)]
 
-        #this makes 1,2,3...30 (payoff values)
+        # generates randomized payoff values per cell
         [self.randomRange.append(x) for x in range(1, self.rangeVal+1)]
 
         #shuffles the array (so its not just  [0,0,1,2] but random [2,0,1,0])
@@ -25,11 +28,17 @@ class Board():
         # we also pass in parameters N, D, p to split the extraction of the payoff
         # into randomized microsteps with probability p
         self.board = [[Cell(np.random.choice(self.randomRange), (i, j), N, D, p) for j in range(self.cols)] for i in range(self.rows)]
+        
+        # keeps the original payoff values
         self.originalPays = self.getPayoffs()
+
+        # records original, total payoff of the board 
         self.totalPayoff = sum(self.flatten(self.originalPays))
+
         #dictionary of cell location with scientists currently querying it
         self.cellsHit = {}
 
+        # keeping data for experiment csv files
         self.bStats = []
         self.cStats = []
         self.sStats = []
@@ -60,6 +69,7 @@ class Board():
         distribute the funding allotted for each cell to the scientists in the cell
         """
         denominator = 0
+        # keep a probability table for each scientist in the dept to get funding
         probabilities = np.zeros_like(dept)
         for sci in dept:
             star = sci.getStarFactor(starFactorWeights)
@@ -184,6 +194,7 @@ class Board():
         for i in range(self.rows):
             for j in range(self.cols):
                 cell = self.board[i][j]
+                
                 # compare to original payoff color
                 # we want at least some of the original payoff to show
 
@@ -201,11 +212,6 @@ class Board():
                                 color=plotColors[j][i],
                                 linewidth=0.4)
                     plt.gca().add_patch(rect)
-                    
-                # # finding the number of scientists on each cell each round
-                # cell.numSciHits = 0
-                # if cell.location in cellsHit.keys():
-                #     cell.numSciHits = len(cellsHit[cell.location])
                     
                     # plotting the "dot" scientists
                     for x in range(1, cell.numSciHits + 1):
