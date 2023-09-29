@@ -5,6 +5,7 @@ import latextable
 import pandas as pd
 import os
 import statistics
+import scipy.special
 from tabulate import tabulate
 from texttable import Texttable
 from Run import *
@@ -396,3 +397,48 @@ def callBarGraph():
             csv_files.append(userFiles)
 
     generateBarGraph(csv_files, x_tick_labels, legend_labels)
+
+
+def generateKL(file, numScientists, boardDimensions, numRuns, numExperiments):
+    """generates the KL divergence per run between the uniform spread of scientists and the actual run to measure herding"""
+    
+    conn = sqlite3.connect(file)
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM cStats")
+
+    # P is the ideal distribution
+    P = [(numScientists/(boardDimensions * boardDimensions))] * (boardDimensions * boardDimensions)
+    Q = []
+    KL = []
+    id = 1
+    while id <= (numRuns * numExperiments): 
+        sql_numQueries = "SELECT numQueries FROM cStats WHERE ID = " + str(id) + ";" 
+        cursor.execute(sql_numQueries)
+        numQueries = cursor.fetchall()
+        numQueries = int(numQueries[0][0])
+
+        sql_location = "SELECT location FROM cStats WHERE ID = " + str(id) + ";"
+        cursor.execute(sql_location)
+        location = cursor.fetchall()
+        location = (int(location[0][0][1]), int(location[0][0][4]))
+
+        sql_numExperiment = "SELECT numExperiment FROM cStats WHERE ID = " + str(id) + ";"
+        cursor.execute(sql_numExperiment)
+        numExperiment = cursor.fetchall()
+        numExperiment = int(numExperiment[0][0])
+
+        sql_timeStep = "SELECT timeStep FROM cStats WHERE ID = " + str(id) + ";"
+        cursor.execute(sql_timeStep)
+        timeStep = cursor.fetchall()
+        timeStep = int(timeStep[0][0])
+
+        Q += [numQueries/numScientists]
+        if location == (boardDimensions-1, boardDimensions-1): #if we have boardDimensions^2 cells in our list
+            KL += (numExperiment, timeStep, scipy.special.kl_div(P, Q))
+            Q = []
+
+        id += 1
+
+    cursor.close()
+    conn.close()
+    return KL 
