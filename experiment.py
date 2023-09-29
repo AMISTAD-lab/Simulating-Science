@@ -190,7 +190,7 @@ def generateLineGraph(listOfFolders):
     plot_confidence_interval(8, payoffs[7])
     plot_confidence_interval(9, payoffs[8])
     plot_confidence_interval(10, payoffs[9])
-    plot_confidence_interval(11, payoffs[10])
+    # plot_confidence_interval(11, payoffs[10])
 
     plt.show()
     return
