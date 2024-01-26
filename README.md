@@ -18,7 +18,7 @@ scientistIncentives citation 1
 fundFactors visPayoff 0.5
 
 To generate an animation of each batchRun, uncomment the second to last line in the oneRun funciton in Run.py.
-Note that you may need to install packages like latextable if you want to perform certain functions like generating latex figures.
+Note that you may need to install packages like latextable if you want to perform certain functions like generating LaTeX figures.
 
 # Additional Help
 If more clarification is needed, feel free to contact the AMISTAD Lab at Harvey Mudd College.
