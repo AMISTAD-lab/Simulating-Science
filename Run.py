@@ -53,7 +53,7 @@ def oneRun(board, cellsHit, numRun, starFactorWeights, dept, exp, inputStr, numE
     conn.commit()
 
     # UNCOMMENT FOR VISUALIZATION
-    #board.drawBoard(cellsHit, numRun, starFactorWeights)
+    # board.drawBoard(cellsHit, numRun, starFactorWeights)
     return board
 
 def batchRun(board, numScientists, numRuns, data, input, numExperiment, currentScientist):
