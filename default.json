@@ -8,9 +8,6 @@
     "fundFactors" : 
     {"visPayoff" : 0, "starFactor" : 0, "totalHits" : 0, "recentHits" : 0},
 
-    "exp" :
-    {"num" : 3},
-
     "payoffExtraction" : 
     {"N" : 15, "D" : 10, "p" : 0.5},
 

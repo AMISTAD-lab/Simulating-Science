@@ -1,5 +1,6 @@
 import numpy as np
 import random
+import math
 from classCell import *
 
 class Scientist():
@@ -62,12 +63,13 @@ class Scientist():
         # Calculate the probabilities for each cell
         probabilities = np.random.rand(board.rows, board.cols)
         denominator = 0
+
         for x in range(board.rows):
             for y in range(board.cols):
                 cell = board.board[x][y]
-                denominator += ((c * cell.numSciHits) + \
+                denominator += math.exp(((c * cell.numSciHits) + \
                     (i * board.getVisPayoff(cell.location)) + (f * cell.funds) + \
-                    (e * 1/(1+cell.numHits))) ** exp
+                    (e * 1/(1+cell.numHits))))
         
         # generate random probabilities if denominator is 0
         if denominator == 0:
@@ -78,8 +80,8 @@ class Scientist():
             for k in range(board.cols):
                 cell = board.board[j][k]
                 
-                numerator = ((c * cell.numSciHits) + (i * board.getVisPayoff(cell.location)) + \
-                    (e * 1/(1 + cell.numHits)) + (f * cell.funds)) ** exp
+                numerator = math.exp(((c * cell.numSciHits) + (i * board.getVisPayoff(cell.location)) + \
+                    (e * 1/(1 + cell.numHits)) + (f * cell.funds)))
                 
                 probabilities[j][k] = numerator / denominator
         return probabilities

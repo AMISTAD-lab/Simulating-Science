@@ -1,6 +1,7 @@
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
 import numpy as np
+import math
 from classCell import *
 
 class Board():
@@ -78,7 +79,7 @@ class Board():
                 star = 1/abs(star)
             elif star < 1:
                 star = 1
-            denominator += star ** exp
+            denominator += math.exp(star)
 
         for i in range(len(dept)):
             star = dept[i].getStarFactor(starFactorWeights)
@@ -86,7 +87,7 @@ class Board():
                 star = 1/abs(star)
             elif star < 1:
                 star = 1
-            numerator = star ** exp
+            numerator = math.exp(star)
             
             probabilities[i] = numerator / denominator
             # distribute funding based on starFactor for each scientist compared to whole department
@@ -123,7 +124,7 @@ class Board():
                 numHitsWeight = chooseCellToFund["totalHits"] * (cell.numHits)
                 recentHitsWeight = chooseCellToFund["recentHits"] * (cell.numSciHits)
 
-                denominator += (visWeight + starWeight + numHitsWeight + recentHitsWeight) ** exp
+                denominator += math.exp((visWeight + starWeight + numHitsWeight + recentHitsWeight))
         
         # generate random probabilities if denominator is 0
         if denominator == 0:
@@ -162,7 +163,7 @@ class Board():
                 numHitsWeight = chooseCellToFund["totalHits"] * (cell.numHits)
                 recentHitsWeight = chooseCellToFund["recentHits"] * (cell.numSciHits)
 
-                numerator = (visWeight + starWeight + numHitsWeight + recentHitsWeight) ** exp
+                numerator = math.exp((visWeight + starWeight + numHitsWeight + recentHitsWeight))
                 probabilities[j][k] = numerator / denominator
 
                 #fund cell and then scientist based on probabilities
