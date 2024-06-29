@@ -61,6 +61,18 @@ class Board():
         '''
         return (self.originalPays[location[1]][location[0]] - self.board[location[0]][location[1]].payoff)
 
+    def getRemainingPayoff(self, location):
+        '''
+        returns the payoff that is remaining from given cell location
+        '''
+        return self.board[location[1]][location[0]].payoff
+
+    def getTotalPayoff(self, location):
+        '''
+        returns the total payoff from given cell location
+        '''
+        return self.originalPays[location[1]][location[0]]
+
     def flatten(self, matrix):
         """turns a 2D matrix into a 1D list"""
         return [matrix[i][j] for j in range(len(matrix[0])) for i in range(len(matrix))]
@@ -172,6 +184,7 @@ class Board():
                 if cell.location in self.cellsHit.keys():
                     self.distributeFundingSci(exp, self.cellsHit[cell.location], cell.funds, starFactorWeights)
         return probabilities
+
 
     def updateNumSciHits(self):
         """updates the cellsHit dictionary for the current board"""
