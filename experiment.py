@@ -134,7 +134,7 @@ def experiment(numScientists, numRuns, numExperiments, boardDimension):
     cellStats = "cellStats.csv"
     with open(cellStats, 'w', newline='') as file:
         writer = csv.writer(file)
-        header = ['Input', 'Location', 'Funds', 'Payoff Extracted']
+        header = ['Input', 'Location', 'Funds', 'Payoff Extracted', 'Remaining Payoff', 'Total Payoff']
         writer.writerow(header)
         for l in cStats:
             writer.writerows(l)
@@ -441,4 +441,4 @@ def generateKL(file, numScientists, boardDimensions, numRuns, numExperiments):
 
     cursor.close()
     conn.close()
-    return KL 
+    return KL

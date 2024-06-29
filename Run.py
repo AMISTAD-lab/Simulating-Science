@@ -134,6 +134,7 @@ def batchRun(board, numScientists, numRuns, data, input, numExperiment, currentS
     for x in range(board.rows):
             for y in range(board.cols):
                 cell = board.board[x][y]
-                board.cStats.append([input, cell.location, cell.totalFunds, board.getVisPayoff(cell.location)])
+                board.cStats.append([input, cell.location, cell.totalFunds, 
+                                    board.getVisPayoff(cell.location), board.getRemainingPayoff(cell.location), board.getTotalPayoff(cell.location)])
 
     return (currentScientist+totalScientists), [board.bStats, board.cStats, board.sStats]
