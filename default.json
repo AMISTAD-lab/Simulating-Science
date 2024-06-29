@@ -11,6 +11,9 @@
     "payoffExtraction" : 
     {"N" : 15, "D" : 10, "p" : 0.5},
 
+    "exp":
+    {"num" : 1},
+
     "zeroPayoff" :
     {"probability" : 0.05},
 

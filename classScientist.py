@@ -67,7 +67,7 @@ class Scientist():
         for x in range(board.rows):
             for y in range(board.cols):
                 cell = board.board[x][y]
-                denominator += math.exp(((c * cell.numSciHits) + \
+                denominator += np.exp(((c * cell.numSciHits) + \
                     (i * board.getVisPayoff(cell.location)) + (f * cell.funds) + \
                     (e * 1/(1+cell.numHits))))
         
@@ -80,7 +80,7 @@ class Scientist():
             for k in range(board.cols):
                 cell = board.board[j][k]
                 
-                numerator = math.exp(((c * cell.numSciHits) + (i * board.getVisPayoff(cell.location)) + \
+                numerator = np.exp(((c * cell.numSciHits) + (i * board.getVisPayoff(cell.location)) + \
                     (e * 1/(1 + cell.numHits)) + (f * cell.funds)))
                 
                 probabilities[j][k] = numerator / denominator

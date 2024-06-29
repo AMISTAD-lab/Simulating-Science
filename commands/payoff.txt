@@ -1,0 +1,49 @@
+scientistIncentives payoff 0
+scientistIncentives citation 0.33
+scientistIncentives exploration 0.33
+scientistIncentives funding 0.33
+
+scientistIncentives payoff 0.1
+scientistIncentives citation 0.3
+scientistIncentives exploration 0.3
+scientistIncentives funding 0.3
+
+scientistIncentives payoff 0.2
+scientistIncentives citation 0.266
+scientistIncentives exploration 0.266
+scientistIncentives funding 0.266
+
+scientistIncentives payoff 0.3
+scientistIncentives citation 0.233
+scientistIncentives exploration 0.233
+scientistIncentives funding 0.233
+
+scientistIncentives payoff 0.4
+scientistIncentives citation 0.2
+scientistIncentives exploration 0.2
+scientistIncentives funding 0.2
+
+scientistIncentives payoff 0.5
+scientistIncentives citation 0.167
+scientistIncentives exploration 0.167
+scientistIncentives funding 0.167
+
+scientistIncentives payoff 0.6
+scientistIncentives citation 0.133
+scientistIncentives exploration 0.133
+scientistIncentives funding 0.133
+
+scientistIncentives payoff 0.7
+scientistIncentives citation 0.1
+scientistIncentives exploration 0.1
+scientistIncentives funding 0.1
+
+scientistIncentives payoff 0.8
+scientistIncentives citation 0.066
+scientistIncentives exploration 0.066
+scientistIncentives funding 0.066
+
+scientistIncentives payoff 0.9
+scientistIncentives citation 0.033
+scientistIncentives exploration 0.033
+scientistIncentives funding 0.033

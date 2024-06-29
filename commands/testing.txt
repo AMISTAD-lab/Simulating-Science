@@ -1,0 +1,4 @@
+scientistIncentives payoff 0.9
+scientistIncentives citation 0.033
+scientistIncentives exploration 0.033
+scientistIncentives funding 0.033
