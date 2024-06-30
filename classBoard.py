@@ -81,7 +81,7 @@ class Board():
         """
         distribute the funding allotted for each cell to the scientists in the cell
         """
-        denominator = 0
+        denominator = 1
         # keep a probability table for each scientist in the dept to get funding
         probabilities = np.zeros_like(dept)
         for sci in dept:
@@ -99,6 +99,8 @@ class Board():
                 star = 1/abs(star)
             elif star < 1:
                 star = 1
+            elif star > 20:
+                star= 20
             numerator = np.exp(star)
             
             probabilities[i] = numerator / denominator
@@ -111,7 +113,7 @@ class Board():
         """distributes funding to each cell based on input weights"""
         # Calculate the probabilities for each cell
         probabilities = np.random.rand(self.rows, self.cols)
-        denominator = 0
+        denominator = 1
         total = self.rows * self.cols * funding["fundsPerCell"]
         for x in range(self.rows):
             for y in range(self.cols):

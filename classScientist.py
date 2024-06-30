@@ -30,39 +30,42 @@ class Scientist():
 
     def probCell(self, board, weights, exp):
         """"generates a probability distribution over the cells"""
-        # if they have a low citToCareer difference, then they value citations more
-        # also, ensure numbers are in reasonable range
-        citToCareer = (self.citcount-(31 - self.career))
-        if citToCareer <= -1:
-            c = weights["citation"] * abs(citToCareer)
-        elif citToCareer >= 1:
-            c = weights["citation"] * (1/citToCareer)
-        else:
-            c = weights["citation"]
+        # # if they have a low citToCareer difference, then they value citations more
+        # # also, ensure numbers are in reasonable range
+        # citToCareer = (self.citcount-(31 - self.career))
+        # if citToCareer <= -1:
+        #     c = weights["citation"] * abs(citToCareer)
+        # elif citToCareer >= 1:
+        #     c = weights["citation"] * (1/citToCareer)
+        # else:
+        #     c = weights["citation"]
 
-        # if they have a low impactToCareer difference, then they value impact more
-        impactToCareer = (self.impact-(31 - self.career))
-        if impactToCareer <= -1:
-            i = weights["payoff"] * abs(impactToCareer)
-        elif impactToCareer >= 1:
-            i = weights["payoff"] * (1/impactToCareer)
-        else:
-            i = weights["payoff"]
+        # # if they have a low impactToCareer difference, then they value impact more
+        # impactToCareer = (self.impact-(31 - self.career))
+        # if impactToCareer <= -1:
+        #     i = weights["payoff"] * abs(impactToCareer)
+        # elif impactToCareer >= 1:
+        #     i = weights["payoff"] * (1/impactToCareer)
+        # else:
+        #     i = weights["payoff"]
 
-        # if they have a low fundToCareer difference, then they value funding more
-        fundToCareer = (self.funding-(31 - self.career))
-        if fundToCareer <= -1:
-            f = weights["funding"] * abs(fundToCareer)
-        elif fundToCareer >= 1:
-            f = weights["funding"] * (1/fundToCareer)
-        else:
-            f = weights["funding"]
+        # # if they have a low fundToCareer difference, then they value funding more
+        # fundToCareer = (self.funding-(31 - self.career))
+        # if fundToCareer <= -1:
+        #     f = weights["funding"] * abs(fundToCareer)
+        # elif fundToCareer >= 1:
+        #     f = weights["funding"] * (1/fundToCareer)
+        # else:
+        #     f = weights["funding"]
 
         e = weights["exploration"]
+        c = weights["citation"]
+        i = weights["payoff"]
+        f = weights["funding"]
 
         # Calculate the probabilities for each cell
         probabilities = np.random.rand(board.rows, board.cols)
-        denominator = 0
+        denominator = 1
 
         for x in range(board.rows):
             for y in range(board.cols):
@@ -105,7 +108,7 @@ class Scientist():
         # Calculate the probabilities for each cell
         probabilities = np.zeros_like(val)
 
-        denominator = 0
+        denominator = 1
         for sci in val:
             star = sci.getStarFactor(starFactorWeights)
             # ensure numbers are in reasonable range
@@ -113,8 +116,10 @@ class Scientist():
                 star = 1/abs(star)
             elif star < 1:
                 star = 1
+            elif star > 20:
+                star= 20
 
-            denominator += star ** exp
+            denominator += np.exp(star)
 
         for i in range(len(val)):
             star = val[i].getStarFactor(starFactorWeights)
@@ -122,8 +127,10 @@ class Scientist():
                 star = 1/abs(star)
             elif star < 1:
                 star = 1
+            elif star > 20:
+                star= 20
 
-            numerator = star ** exp
+            numerator = np.exp(star)
             probabilities[i] = numerator / denominator
         return probabilities
 
