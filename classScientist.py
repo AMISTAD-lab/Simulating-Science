@@ -72,7 +72,7 @@ class Scientist():
                 cell = board.board[x][y]
                 denominator += np.exp(((c * cell.numSciHits) + \
                     (i * board.getVisPayoff(cell.location)) + (f * cell.funds) + \
-                    (e * 1/(1+cell.numHits))))
+                    (e * 1/(1+cell.numHits))) - 100)
         
         # generate random probabilities if denominator is 0
         if denominator == 0:
@@ -84,7 +84,7 @@ class Scientist():
                 cell = board.board[j][k]
                 
                 numerator = np.exp(((c * cell.numSciHits) + (i * board.getVisPayoff(cell.location)) + \
-                    (e * 1/(1 + cell.numHits)) + (f * cell.funds)))
+                    (e * 1/(1 + cell.numHits)) + (f * cell.funds)) - 100)
                 
                 probabilities[j][k] = numerator / denominator
         return probabilities
@@ -119,7 +119,7 @@ class Scientist():
             elif star > 20:
                 star= 20
 
-            denominator += np.exp(star)
+            denominator += np.exp(star - 100)
 
         for i in range(len(val)):
             star = val[i].getStarFactor(starFactorWeights)
@@ -130,7 +130,7 @@ class Scientist():
             elif star > 20:
                 star= 20
 
-            numerator = np.exp(star)
+            numerator = np.exp(star - 100)
             probabilities[i] = numerator / denominator
         return probabilities
 

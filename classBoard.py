@@ -91,7 +91,7 @@ class Board():
                 star = 1/abs(star)
             elif star < 1:
                 star = 1
-            denominator += np.exp(star)
+            denominator += np.exp(star - 100)
 
         for i in range(len(dept)):
             star = dept[i].getStarFactor(starFactorWeights)
@@ -101,7 +101,7 @@ class Board():
                 star = 1
             elif star > 20:
                 star= 20
-            numerator = np.exp(star)
+            numerator = np.exp(star - 100)
             
             probabilities[i] = numerator / denominator
             # distribute funding based on starFactor for each scientist compared to whole department
@@ -138,7 +138,7 @@ class Board():
                 numHitsWeight = chooseCellToFund["totalHits"] * (cell.numHits)
                 recentHitsWeight = chooseCellToFund["recentHits"] * (cell.numSciHits)
 
-                denominator += np.exp((visWeight + starWeight + numHitsWeight + recentHitsWeight))
+                denominator += np.exp((visWeight + starWeight + numHitsWeight + recentHitsWeight) - 100)
         
         # generate random probabilities if denominator is 0
         if denominator == 0:
@@ -177,7 +177,7 @@ class Board():
                 numHitsWeight = chooseCellToFund["totalHits"] * (cell.numHits)
                 recentHitsWeight = chooseCellToFund["recentHits"] * (cell.numSciHits)
 
-                numerator = np.exp((visWeight + starWeight + numHitsWeight + recentHitsWeight))
+                numerator = np.exp((visWeight + starWeight + numHitsWeight + recentHitsWeight) - 100)
                 probabilities[j][k] = numerator / denominator
 
                 #fund cell and then scientist based on probabilities
