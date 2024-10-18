@@ -109,11 +109,16 @@ def remainingPayoffExtraction():
 
     return df_payoff_results
 
+from scipy.stats import pearsonr
+import numpy as np
+import pandas as pd
+import sqlite3
+
 def queriesExtraction():
     '''
     Produces numpy 2D arrays to run the herding function on corresponding to each
-    time step and calculates Pearson correlation with raw payoff values.
-    Outputs two CSV files: one for the herding results, and another for the Pearson correlation results.
+    time step, calculates Pearson correlation between herding and payoff values,
+    and outputs Pearson correlation, p-value, and 95% confidence intervals.
     '''
     # Connect to the database
     conn = sqlite3.connect('data.db')
@@ -187,11 +192,24 @@ def queriesExtraction():
         # Calculate Pearson correlation between Herding and Raw Payoff values
         correlation, p_value = pearsonr(df_combined['Herding'], df_combined['Raw Payoff'])
 
-        # Append Pearson correlation results for this input_str
-        correlation_results.append([input_str, correlation, p_value])
+        # Calculate 95% confidence interval for Pearson correlation
+        n = len(df_combined)  # sample size
+        if n > 2:  # Ensure there are enough data points for meaningful correlation
+            # Standard error of the correlation
+            se_r = np.sqrt((1 - correlation ** 2) / (n - 2))
+
+            # 95% confidence interval
+            z = 1.96  # Z-score for 95% confidence
+            ci_lower = correlation - z * se_r
+            ci_upper = correlation + z * se_r
+        else:
+            ci_lower, ci_upper = np.nan, np.nan
+
+        # Append Pearson correlation results for this input_str, along with CI
+        correlation_results.append([input_str, correlation, p_value, ci_lower, ci_upper])
 
     # Convert correlation results to DataFrame and save to CSV
-    df_correlation_results = pd.DataFrame(correlation_results, columns=['Input String', 'Pearson Correlation', 'p-value'])
-    df_correlation_results.to_csv('pearson_correlation_results.csv', index=False)
+    df_correlation_results = pd.DataFrame(correlation_results, columns=['Input String', 'Pearson Correlation', 'p-value', 'CI Lower', 'CI Upper'])
+    df_correlation_results.to_csv('pearson_correlation_results_with_CI.csv', index=False)
 
     return df_herding_results, df_correlation_results
