@@ -160,6 +160,13 @@ def plot_confidence_interval(x, values, z=1.96, color='#2187bb', horizontal_line
    top = mean - confidence_interval
    right = x + horizontal_line_width / 2
    bottom = mean + confidence_interval
+
+
+   # Ensure that the confidence intervals don't go below 0 or above 110
+   top = max(0, top)
+   bottom = min(110, bottom)
+
+
    plt.plot([x, x], [top, bottom], color=color)
    plt.plot([left, right], [top, top], color=color)
    plt.plot([left, right], [bottom, bottom], color=color)
@@ -168,35 +175,45 @@ def plot_confidence_interval(x, values, z=1.96, color='#2187bb', horizontal_line
 
    return mean, confidence_interval
 
-def generateLineGraph(title, listOfFolders):
-    payoffs = []
-    for folder in listOfFolders:
-        dirList = os.listdir(folder)
-        for file in dirList:
-            with open(str(folder) + "/" + str(file)) as file_obj:
-                if file != ".DS_Store":
-                    data = pd.read_csv(str(folder) + "/" + str(file))
-                    if file == 'boardStats.csv':
-                        payoffs.append(data['Percentage Payoff Discovered'].tolist())
-    plt.xticks([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
-        ['0.0', '0.1', '0.2', '0.3', '0.4', '0.5', '0.6', '0.7', '0.8', '0.9', '1.0'])
-    plt.xlabel(f'{title} Weight')
-    plt.ylabel('Average Percentage Payoff Discovered')
-    plot_confidence_interval(1, payoffs[0])
-    plot_confidence_interval(2, payoffs[1])
-    plot_confidence_interval(3, payoffs[2])
-    plot_confidence_interval(4, payoffs[3])
-    plot_confidence_interval(5, payoffs[4])
-    plot_confidence_interval(6, payoffs[5])
-    plot_confidence_interval(7, payoffs[6])
-    plot_confidence_interval(8, payoffs[7])
-    plot_confidence_interval(9, payoffs[8])
-    plot_confidence_interval(10, payoffs[9])
-    plot_confidence_interval(11, payoffs[10])
 
-    plt.savefig('linePlot.pdf', bbox_inches='tight')
-    plt.show()
-    return
+def generateLineGraph(title, listOfFolders):
+   payoffs = []
+   for folder in listOfFolders:
+       dirList = os.listdir(folder)
+       for file in dirList:
+           with open(str(folder) + "/" + str(file)) as file_obj:
+               if file != ".DS_Store":
+                   data = pd.read_csv(str(folder) + "/" + str(file))
+                   if file == 'boardStats.csv':
+                       payoffs.append(data['Percentage Payoff Discovered'].tolist())
+
+
+   plt.xticks([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
+              ['0.0', '0.1', '0.2', '0.3', '0.4', '0.5', '0.6', '0.7', '0.8', '0.9', '1.0'])
+   plt.xlabel(f'{title} Weight')
+   plt.ylabel('Average Percentage Payoff Discovered')
+
+
+   # Set the y-axis range to be between 0 and 100
+   plt.ylim(0, 110)
+
+
+   plot_confidence_interval(1, payoffs[0])
+   plot_confidence_interval(2, payoffs[1])
+   plot_confidence_interval(3, payoffs[2])
+   plot_confidence_interval(4, payoffs[3])
+   plot_confidence_interval(5, payoffs[4])
+   plot_confidence_interval(6, payoffs[5])
+   plot_confidence_interval(7, payoffs[6])
+   plot_confidence_interval(8, payoffs[7])
+   plot_confidence_interval(9, payoffs[8])
+   plot_confidence_interval(10, payoffs[9])
+   plot_confidence_interval(11, payoffs[10])
+
+
+   plt.savefig('linePlot.pdf', bbox_inches='tight')
+   plt.show()
+   return
     
 def generateLaTeX(listOfFolders):
     """
