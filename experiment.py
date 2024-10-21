@@ -311,14 +311,14 @@ def generateLaTeX(listOfFolders):
 
     return
     
-def generateBarGraph(csv_file, x_tick_labels=None, legend_labels = None):
+def generateBarGraph(csv_files, x_tick_labels=None, legend_labels=None):
     #empty lists to hold the data for each CSV file
     all_data = []
     all_averages = []
     all_variances = []
 
     #colors for the bars
-    colors = ['blue', 'green', 'purple'] #orange, red
+    colors = ['#016528', '#64b46c', '#bee5b8']
 
     for csv_file in csv_files:
         #Read the CSV file
@@ -345,7 +345,6 @@ def generateBarGraph(csv_file, x_tick_labels=None, legend_labels = None):
 
     #width of each bar
     width = 0.2
-    #bar_positions = [x - width/2, x + width/2]
     bar_positions = [x - width + width * i for i in range(3)]
 
     fig, ax = plt.subplots()
@@ -353,11 +352,6 @@ def generateBarGraph(csv_file, x_tick_labels=None, legend_labels = None):
     #Plot the bars
     for i, position in enumerate(bar_positions):
         bars = ax.bar(position, all_data[i::3], width=width, yerr=np.sqrt(all_variances[i::3]), capsize=4, color=colors[i], label=f'Bar Group {i+1}')
-
-    #show exact values of each bar(comment out)
-    # for i, position in enumerate(bar_positions):
-    #     for j, val in enumerate(all_data[i::3]):
-    #         ax.text(position[j], val, str(val), ha='center', va='bottom')
 
     #Remove x-axis ticks
     ax.tick_params(axis='x', which='both', bottom=False, top=False)
@@ -387,36 +381,32 @@ def generateBarGraph(csv_file, x_tick_labels=None, legend_labels = None):
     plt.show()
 
 def callBarGraph():
+    csv_files = []
     x_tick_labels = []
     legend_labels = []
 
-    condition = True
-    print("input csv files")
-    while condition:
+    print("Input CSV files (press Enter without input to finish):")
+    while True:
         userFiles = str(input())
         if userFiles == '':
-            condition2 = True
-            print("input x labels")
-            while condition2:
-                userXLabels = str(input())
-                if userXLabels == '':
-                    condition3 = True
-                    print("input legend labels")
-                    while condition3:
-                        userLegend = str(input())
-                        if userLegend == '':
-                            condition3 = False
-                            condition2 = False
-                            condition = False
-                        else:
-                            legend_labels.append(userLegend)
-                else:
-                    x_tick_labels.append(userXLabels)
-        else:
-            csv_files.append(userFiles)
+            break
+        csv_files.append(userFiles)
+
+    print("Input x-axis labels (press Enter without input to finish):")
+    while True:
+        userXLabels = str(input())
+        if userXLabels == '':
+            break
+        x_tick_labels.append(userXLabels)
+
+    print("Input legend labels (press Enter without input to finish):")
+    while True:
+        userLegend = str(input())
+        if userLegend == '':
+            break
+        legend_labels.append(userLegend)
 
     generateBarGraph(csv_files, x_tick_labels, legend_labels)
-
 
 def generateKL(file, numScientists, boardDimensions, numRuns, numExperiments):
     """generates the KL divergence per run between the uniform spread of scientists and the actual run to measure herding"""
