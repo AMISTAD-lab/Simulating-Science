@@ -9,68 +9,79 @@ import scipy.special
 from tabulate import tabulate
 from texttable import Texttable
 from Run import *
+# from altRun.py import *
+# from autoAltExp import *
 
-csv_files = []
+def chk_conn(conn):
+     try:
+        conn.cursor()
+        return True
+     except Exception as ex:
+        return False
 
-inp = "default.json"
-with open(inp, "r") as params:
-    data = json.load(params)
+def openConn():
+    csv_files = []
 
-# setting up sql database connection
-conn = sqlite3.connect('data.db')
+    inp = "default.json"
+    with open(inp, "r") as params:
+        data = json.load(params)
 
-# Define the schema
+    # setting up sql database connection
+    conn = sqlite3.connect('data.db')
 
-conn.execute('''CREATE TABLE IF NOT EXISTS bStats (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    inputStr STRING,
-                    payoffExtracted FLOAT,
-                    attrition INTEGER,
-                    attritionRate FLOAT
-                )''')
+    # Define the schema
 
-conn.execute('''CREATE TABLE IF NOT EXISTS cStats (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    inputStr STRING,
-                    numExperiment INTEGER,
-                    timeStep INTEGER,
-                    location STRING,
-                    totalFunds FLOAT,
-                    totalPayoffExtracted FLOAT,
-                    numQueries INTEGER,
-                    uniqIds STRING
-                )''')
+    conn.execute('''CREATE TABLE IF NOT EXISTS bStats (
+                        id INTEGER PRIMARY KEY AUTOINCREMENT,
+                        inputStr STRING,
+                        payoffExtracted FLOAT,
+                        attrition INTEGER,
+                        attritionRate FLOAT
+                    )''')
 
-conn.execute('''CREATE TABLE IF NOT EXISTS sStats (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    inputStr STRING,
-                    numExperiment INTEGER,
-                    timeStep INTEGER,
-                    uniqId INTEGER,
-                    totalFunds FLOAT,
-                    starFactor FLOAT,
-                    totalCitations INTEGER,
-                    totalImpact FLOAT,
-                    cellQueried STRING
-                )''')
+    conn.execute('''CREATE TABLE IF NOT EXISTS cStats (
+                        id INTEGER PRIMARY KEY AUTOINCREMENT,
+                        inputStr STRING,
+                        numExperiment INTEGER,
+                        timeStep INTEGER,
+                        location STRING,
+                        totalFunds FLOAT,
+                        totalPayoffExtracted FLOAT,
+                        numQueries INTEGER,
+                        uniqIds STRING
+                    )''')
 
-conn.execute('''CREATE TABLE IF NOT EXISTS runStats (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    inputStrSci STRING,
-                    numExpSci INTEGER,
-                    timeStepSci INTEGER,
-                    inputStrCell STRING,
-                    numExpCell INTEGER,
-                    timeStepCell INTEGER,
-                    numCellsHit INTEGER,
-                    FOREIGN KEY (inputStrSci) REFERENCES sStats(inputStr),
-                    FOREIGN KEY (numExpSci) REFERENCES sStats(numExperiment),
-                    FOREIGN KEY (timeStepSci) REFERENCES sStats(timeStep),
-                    FOREIGN KEY (inputStrCell) REFERENCES cStats(inputStr),
-                    FOREIGN KEY (numExpCell) REFERENCES cStats(numExperiment),
-                    FOREIGN KEY (timeStepCell) REFERENCES cStats(timeStep)
-                )''')
-conn.commit()
+    conn.execute('''CREATE TABLE IF NOT EXISTS sStats (
+                        id INTEGER PRIMARY KEY AUTOINCREMENT,
+                        inputStr STRING,
+                        numExperiment INTEGER,
+                        timeStep INTEGER,
+                        uniqId INTEGER,
+                        totalFunds FLOAT,
+                        starFactor FLOAT,
+                        totalCitations INTEGER,
+                        totalImpact FLOAT,
+                        cellQueried STRING
+                    )''')
+
+    conn.execute('''CREATE TABLE IF NOT EXISTS runStats (
+                        id INTEGER PRIMARY KEY AUTOINCREMENT,
+                        inputStrSci STRING,
+                        numExpSci INTEGER,
+                        timeStepSci INTEGER,
+                        inputStrCell STRING,
+                        numExpCell INTEGER,
+                        timeStepCell INTEGER,
+                        numCellsHit INTEGER,
+                        FOREIGN KEY (inputStrSci) REFERENCES sStats(inputStr),
+                        FOREIGN KEY (numExpSci) REFERENCES sStats(numExperiment),
+                        FOREIGN KEY (timeStepSci) REFERENCES sStats(timeStep),
+                        FOREIGN KEY (inputStrCell) REFERENCES cStats(inputStr),
+                        FOREIGN KEY (numExpCell) REFERENCES cStats(numExperiment),
+                        FOREIGN KEY (timeStepCell) REFERENCES cStats(timeStep)
+                    )''')
+    conn.commit()
+    return conn, data
 
 def writeBStats(inputStr, bStats):
     insert_query = "INSERT INTO bStats (inputStr, payoffExtracted, attrition, attritionRate) VALUES (?, ?, ?, ?)"
@@ -78,7 +89,7 @@ def writeBStats(inputStr, bStats):
     conn.execute(insert_query, values)
     conn.commit()
 
-def experiment(numScientists, numRuns, numExperiments, boardDimension):
+def experiment(numScientists, numRuns, numExperiments, boardDimension, newInput):
     """
     runs with given parameters and saves to csv file
     enter the input(s) in the default.json you want to vary from the default in the command line like so:
@@ -86,9 +97,11 @@ def experiment(numScientists, numRuns, numExperiments, boardDimension):
         cellChoiceWeights citation 1
         fundDistributionFactors numHits 0.5
     """
-    inputStr = input()
+    conn, data = openConn()
+    # inputStr = input()
     fullInput = []
-    while inputStr != "":
+    # while inputStr != "":
+    for inputStr in newInput:
         if len(inputStr.split()) == 3:
             typeParam = inputStr.split()[0]
             param = inputStr.split()[1]
@@ -102,7 +115,7 @@ def experiment(numScientists, numRuns, numExperiments, boardDimension):
         else:
             print("check input format - input must be of different length")
             return
-        inputStr = input()
+        # inputStr = input()
     fullInput = ", ".join(fullInput)
 
     N = data["payoffExtraction"]["N"]
@@ -160,13 +173,6 @@ def plot_confidence_interval(x, values, z=1.96, color='#2187bb', horizontal_line
    top = mean - confidence_interval
    right = x + horizontal_line_width / 2
    bottom = mean + confidence_interval
-
-
-   # Ensure that the confidence intervals don't go below 0 or above 110
-   top = max(0, top)
-   bottom = min(110, bottom)
-
-
    plt.plot([x, x], [top, bottom], color=color)
    plt.plot([left, right], [top, top], color=color)
    plt.plot([left, right], [bottom, bottom], color=color)
@@ -175,45 +181,33 @@ def plot_confidence_interval(x, values, z=1.96, color='#2187bb', horizontal_line
 
    return mean, confidence_interval
 
+def generateLineGraph(listOfFolders):
+    payoffs = []
+    for folder in listOfFolders:
+        dirList = os.listdir(folder)
+        for file in dirList:
+            with open(str(folder) + "/" + str(file)) as file_obj:
+                data = pd.read_csv(str(folder) + "/" + str(file))
+                if file == 'boardStats.csv':
+                    payoffs.append(data['Percentage Payoff Discovered'].tolist())
+    plt.xticks([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
+        ['0.0', '0.1', '0.2', '0.3', '0.4', '0.5', '0.6', '0.7', '0.8', '0.9', '1.0'])
+    plt.xlabel('Parameter Weight')
+    plt.ylabel('Average Percentage Payoff Discovered')
+    plot_confidence_interval(1, payoffs[0])
+    plot_confidence_interval(2, payoffs[1])
+    plot_confidence_interval(3, payoffs[2])
+    plot_confidence_interval(4, payoffs[3])
+    plot_confidence_interval(5, payoffs[4])
+    plot_confidence_interval(6, payoffs[5])
+    plot_confidence_interval(7, payoffs[6])
+    plot_confidence_interval(8, payoffs[7])
+    plot_confidence_interval(9, payoffs[8])
+    plot_confidence_interval(10, payoffs[9])
+    # plot_confidence_interval(11, payoffs[10])
 
-def generateLineGraph(title, listOfFolders):
-   payoffs = []
-   for folder in listOfFolders:
-       dirList = os.listdir(folder)
-       for file in dirList:
-           with open(str(folder) + "/" + str(file)) as file_obj:
-               if file != ".DS_Store":
-                   data = pd.read_csv(str(folder) + "/" + str(file))
-                   if file == 'boardStats.csv':
-                       payoffs.append(data['Percentage Payoff Discovered'].tolist())
-
-
-   plt.xticks([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
-              ['0.0', '0.1', '0.2', '0.3', '0.4', '0.5', '0.6', '0.7', '0.8', '0.9', '1.0'])
-   plt.xlabel(f'{title} Weight')
-   plt.ylabel('Average Percentage Payoff Discovered')
-
-
-   # Set the y-axis range to be between 0 and 100
-   plt.ylim(0, 110)
-
-
-   plot_confidence_interval(1, payoffs[0])
-   plot_confidence_interval(2, payoffs[1])
-   plot_confidence_interval(3, payoffs[2])
-   plot_confidence_interval(4, payoffs[3])
-   plot_confidence_interval(5, payoffs[4])
-   plot_confidence_interval(6, payoffs[5])
-   plot_confidence_interval(7, payoffs[6])
-   plot_confidence_interval(8, payoffs[7])
-   plot_confidence_interval(9, payoffs[8])
-   plot_confidence_interval(10, payoffs[9])
-   plot_confidence_interval(11, payoffs[10])
-
-
-   plt.savefig('linePlot.pdf', bbox_inches='tight')
-   plt.show()
-   return
+    plt.show()
+    return
     
 def generateLaTeX(listOfFolders):
     """
@@ -407,6 +401,7 @@ def callBarGraph():
         legend_labels.append(userLegend)
 
     generateBarGraph(csv_files, x_tick_labels, legend_labels)
+
 
 def generateKL(file, numScientists, boardDimensions, numRuns, numExperiments):
     """generates the KL divergence per run between the uniform spread of scientists and the actual run to measure herding"""
