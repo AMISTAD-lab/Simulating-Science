@@ -2,24 +2,6 @@ from experiment import *
 import os
 import shutil
 
-'''
-USAGE: 
-- To run several experiments at once, as a batch of experiments.
-- Saves board, cell, sci stats for each experiment
-- Only saves one data.db file for all experiments run, so make sure to separate each batch according to how you want the data.db data to be separated. 
-
-HOW TO USE THE AUTO EXP RUNNER:
-- Create or use a txt file under commands folder in the same format
-- param (string): the scientist incentive (payoff, citation, exploration, funding, citationExtra, testing)
-- target_path (string): target directory to put stats.csv files into
-- do:
-    run autoAltExp.py
-
-Note: 
-- After running autoAltExp.py each time, quit ipython and run again. 
-- This makes sure the database connection is for the new, correct one and not the one that's been moved.
-'''
-
 # Looks for param_path file listing the commands to change in the parameters to run the experiments
 param_path = input("Parameters file path: ")
 with open(param_path, 'r') as file:
