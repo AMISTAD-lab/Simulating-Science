@@ -90,11 +90,10 @@ def writeBStats(inputStr, bStats):
 
 def experiment(numScientists, numRuns, numExperiments, boardDimension, newInput):
     """
-    runs with given parameters and saves to csv file
-    enter the input(s) in the default.json you want to vary from the default into the commands like so:
-        [paramType] [param] [newValue]
-        scientistIncentives payoff 0.5
-        fundFactors totalHits 1
+    Uses inputs to execute a number of years of simulation (numRuns), repeated numExperiments times
+    Inputs: 
+        int: numScientists, numRuns, numExperiments, boardDimension
+        string: newInput, from the autoExperiment commands
     """
     conn, data = openConn() # Open connection to csv 
 
