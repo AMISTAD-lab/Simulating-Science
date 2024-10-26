@@ -7,7 +7,18 @@ In the file default.json, you may change the default parameters.
 
 1. Open ipython and navigate to the correct directory.
 
-2. Create a text file containing a list of commands to run, with each paragraph indicating one experiment and each line of the paragraph indicating the change: 
+2. Commands are written to indicate the parameter value you want to vary from default.json as such:
+```
+[paramType] [param] [newValue]
+```
+Example of one sequence of commands:
+```
+Example:
+cellChoiceWeights citation 1
+fundDistributionFactors numHits 0.5
+```
+
+Create a text file containing a list of commands to run, with each paragraph indicating one sequence of experiments and each line of the paragraph indicating the change. 
 
 ```
 scientistIncentives citation 0
