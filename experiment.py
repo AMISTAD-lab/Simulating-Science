@@ -9,19 +9,18 @@ import scipy.special
 from tabulate import tabulate
 from texttable import Texttable
 from Run import *
-# from altRun.py import *
-# from autoAltExp import *
 
 def chk_conn(conn):
-     try:
+    '''Checks if csv connection exists'''
+    try:
         conn.cursor()
         return True
-     except Exception as ex:
+    except Exception as ex:
         return False
 
 def openConn():
+    '''Opens conection to csv using default.json and predefined schema for board (b), cells (c), and scientists (s)'''
     csv_files = []
-
     inp = "default.json"
     with open(inp, "r") as params:
         data = json.load(params)
@@ -29,8 +28,7 @@ def openConn():
     # setting up sql database connection
     conn = sqlite3.connect('data.db')
 
-    # Define the schema
-
+    # Define the database schema
     conn.execute('''CREATE TABLE IF NOT EXISTS bStats (
                         id INTEGER PRIMARY KEY AUTOINCREMENT,
                         inputStr STRING,
@@ -84,6 +82,7 @@ def openConn():
     return conn, data
 
 def writeBStats(inputStr, bStats):
+    '''Compiles board data to be written for each experiment'''
     insert_query = "INSERT INTO bStats (inputStr, payoffExtracted, attrition, attritionRate) VALUES (?, ?, ?, ?)"
     values = (inputStr, bStats[0], bStats[1], bStats[2])
     conn.execute(insert_query, values)
@@ -92,15 +91,15 @@ def writeBStats(inputStr, bStats):
 def experiment(numScientists, numRuns, numExperiments, boardDimension, newInput):
     """
     runs with given parameters and saves to csv file
-    enter the input(s) in the default.json you want to vary from the default in the command line like so:
+    enter the input(s) in the default.json you want to vary from the default into the commands like so:
         [paramType] [param] [newValue]
-        cellChoiceWeights citation 1
-        fundDistributionFactors numHits 0.5
+        scientistIncentives payoff 0.5
+        fundFactors totalHits 1
     """
-    conn, data = openConn()
-    # inputStr = input()
+    conn, data = openConn() # Open connection to csv 
+
+    # Parses through given command input and error checks
     fullInput = []
-    # while inputStr != "":
     for inputStr in newInput:
         if len(inputStr.split()) == 3:
             typeParam = inputStr.split()[0]
@@ -110,23 +109,25 @@ def experiment(numScientists, numRuns, numExperiments, boardDimension, newInput)
                 data[typeParam][param] = newNum
                 fullInput.append(inputStr)
             else:
-                print("parameter you entered does not follow the default style", typeParam, param)
+                print("Parameter you entered does not follow the default style", typeParam, param)
                 return
         else:
-            print("check input format - input must be of different length")
+            print("Check input format - input must be of different length")
             return
-        # inputStr = input()
     fullInput = ", ".join(fullInput)
 
+    # Defines default.json variables
     N = data["payoffExtraction"]["N"]
     D = data["payoffExtraction"]["D"]
     p = data["payoffExtraction"]["p"]
     probZero = data["zeroPayoff"]["probability"]
 
+    # Defines data to be input into csv's
     bStats = []
     cStats = []
     sStats = []
     currentScientist = 0
+    # Gathers data from each experiment
     for x in range(numExperiments):
         board = Board(boardDimension, boardDimension, probZero, N, D, p)
         currentScientist, batchResult = batchRun(board, numScientists, numRuns, data, fullInput, x+1, currentScientist)
@@ -135,8 +136,8 @@ def experiment(numScientists, numRuns, numExperiments, boardDimension, newInput)
         sStats.append(batchResult[2])
         writeBStats(fullInput, bStats[x])
 
-    # write stats to csv output file
-    # each experiment's stats appear in one row
+    # Write data into csv files
+    # Each row of data encompasses one experiment
     boardStats = "boardStats.csv"
     with open(boardStats, 'w', newline='') as file:
         writer = csv.writer(file)

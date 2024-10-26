@@ -6,47 +6,62 @@ from classCell import *
 from classBoard import *
 from classScientist import *
 
-# setting up sql database connection
+# Defining database connection
 conn = sqlite3.connect('data.db')
 
 def oneRun(board, cellsHit, numRun, starFactorWeights, dept, exp, inputStr, numExperiment):
-    """runs query simulation for one year"""
-    for key, val in cellsHit.items():
-        #more than one scientist
-        if len(val) > 1:
-            # randomly choose order in which scientists hit that same cell
-            sciOrder = np.random.permutation(val)
+    """Runs query simulation for one year
+    """
+    # Retrives list of scientists querying each cell
+    for cell, sciList in cellsHit.items():
+        # If there is more than one scientist
+        if len(sciList) > 1:
+            # Randomly choose order in which scientists hit that same cell
+            sciOrder = np.random.permutation(sciList)
             for scientist in sciOrder:
-                scientist.sciQuery(key, board)
-                scientist.cite(val, starFactorWeights, exp)
-                scientist.cellQueried = str(key)
+                scientist.sciQuery(cell, board)
+                scientist.cite(sciList, starFactorWeights, exp) # Citing other scientists querying the same cell
+                scientist.cellQueried = str(cell)
+        # If there is only one scientist
         else:
-            val[0].sciQuery(key, board)
-            val[0].cellQueried = str(key)
+            sciList[0].sciQuery(cell, board)
+            sciList[0].cellQueried = str(cell)
+
+    # Updates the cellsHit dictionary
     board.updateNumSciHits()
 
+    # Updating database for current state of each cell
     for i in range(board.rows*board.cols):
         insert_query = "INSERT INTO cStats (inputStr, numExperiment, timeStep, location, totalFunds, totalPayoffExtracted, numQueries, uniqIds) VALUES (?, ?, ?, ?, ?, ?, ?, ?)"
-        l = board.flatten(board.board)
-        if l[i].location in cellsHit.keys():
-            numQueries = len(cellsHit[l[i].location])
+        flatBoard = board.flatten(board.board)
+        cell = flatBoard[i].location
+
+        # If a cell has been hit
+        if flatBoard[i].location in cellsHit.keys():
+            numQueries = len(cellsHit[cell]) # Retrieve number of queries for this cell
+            # Update list of scientists querying the board by their unique IDs
             uniqIds = []
-            for sci in cellsHit[l[i].location]:
+            for sci in cellsHit[cell]:
                 uniqIds.append(sci.id)
             uniqIds = str(uniqIds)
+        # If a cell has been hit, there are no queries and scientists
         else:
             numQueries = 0
             uniqIds = ""
-        values = (inputStr, numExperiment, numRun, str(l[i].location), l[i].funds, float(board.getVisPayoff(l[i].location)), numQueries, uniqIds)
+        
+        # Insert each cell's data into the database
+        values = (inputStr, numExperiment, numRun, str(cell), cell.funds, float(board.getVisPayoff(cell)), numQueries, uniqIds)
         conn.execute(insert_query, values)
         conn.commit()
 
+    # Updating database for current state of each scientist
     for i in range(len(dept)):
         insert_query = "INSERT INTO sStats (inputStr, numExperiment, timeStep, uniqId, totalFunds, starFactor, totalCitations, totalImpact, cellQueried) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)"
         values = (inputStr, numExperiment, numRun, dept[i].id, dept[i].funding, dept[i].getStarFactor(starFactorWeights), dept[i].citcount, float(dept[i].impact), dept[i].cellQueried)
         conn.execute(insert_query, values)
         conn.commit()
     
+    # Updating database for current state of the run
     insert_query = "INSERT INTO runStats (inputStrSci, numExpSci, timeStepSci, inputStrCell, numExpCell, timeStepCell, numCellsHit) VALUES (?, ?, ?, ?, ?, ?, ?)"
     values = (inputStr, numExperiment, numRun, inputStr, numExperiment, numRun, len(cellsHit))
     conn.execute(insert_query, values)
@@ -62,25 +77,28 @@ def batchRun(board, numScientists, numRuns, data, input, numExperiment, currentS
     During each run, each scientist in the department queries the board.
     At the end, an animation of the plots of each run is generated.
     """
+    # Firm parameters
     weights = data["scientistIncentives"]
     funding = data["fund"]
     chooseCellToFund = data["fundFactors"]
-    # semi-firm parameters that you could easily change but probabily won't need to
+    
+    # Semi-firm parameters
     exp = data["exp"]["num"]
     starFactorWeights = data["star"]
     totalScientists = numScientists
     totalDept = []
 
+    # Defines a department (dept), a list of active scientists
     dept = [Scientist(i) for i in range(currentScientist, currentScientist + numScientists)]
-    attrition = 0
+    attrition = 0 # Scientists who left science
     for j in range(numRuns):
         oldDept = copy.copy(dept)
         totalDept = copy.copy(dept)
         # keep track of which cells the scientists are hitting to check overlap
-        # funding for the first year is determined randomly
+        # Funding for the initial year is determined randomly
         board.distributeFundingCell(chooseCellToFund, funding, exp, starFactorWeights)
 
-        # gives which scientists are at that location
+        # determines which scientists are at that location
         board.cellsHit = {}
         for idx in range(len(dept)):
             scientist = dept[idx]
@@ -115,7 +133,7 @@ def batchRun(board, numScientists, numRuns, data, input, numExperiment, currentS
     print("Percentage of total payoff discovered: ", f"{((board.totalPayoff - currTotal)/board.totalPayoff)*100:.2f}")
     print()
 
-    # #animating plots
+    # # animating plots
     # frames = [Image.open(f'plots/plot{i+1}.png') for i in range(numRuns)]
     # frame_one = frames[0]
     # frame_one.save("animation.gif", format="GIF", append_images=frames,
